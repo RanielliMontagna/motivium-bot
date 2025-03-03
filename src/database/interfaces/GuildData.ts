@@ -1,7 +1,7 @@
-type ChannelInfo = { id: string, url: string };
+type ChannelInfo = { id: string; url: string }
 
 export interface GuildData {
-    channels?: {
-        logs?: ChannelInfo
-    }
+  channels?: {
+    logs?: ChannelInfo
+  }
 }

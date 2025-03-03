@@ -12,7 +12,8 @@
     "start": "node --env-file .env .",
     "start:dev": "node --env-file .env.dev .",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@magicyan/discord": "1.3.0",
@@ -28,7 +29,9 @@
     "@eslint/js": "^9.21.0",
     "@types/node": "20.17.12",
     "eslint": "^9.21.0",
+    "eslint-config-prettier": "^10.0.2",
     "globals": "^16.0.0",
+    "prettier": "^3.5.3",
     "tsx": "4.8.0",
     "typescript": "5.7.2",
     "typescript-eslint": "^8.25.0"

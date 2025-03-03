@@ -1,3 +1,3 @@
-import { bootstrap } from "#base";
+import { bootstrap } from '#base'
 
-await bootstrap({ meta: import.meta });
+await bootstrap({ meta: import.meta })

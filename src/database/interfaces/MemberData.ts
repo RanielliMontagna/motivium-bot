@@ -1,5 +1,5 @@
 export interface MemberData {
-    wallet?: {
-        coins?: number
-    }
+  wallet?: {
+    coins?: number
+  }
 }
