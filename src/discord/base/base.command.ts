@@ -119,6 +119,7 @@ export async function baseRegisterCommands(client: Client<true>) {
         messages.push(...verbooseLogs(commands))
       }
     })
+
     for (const guild of guilds.values()) {
       await guild.commands.set(guildCommands).then((commands) => {
         messages.push(

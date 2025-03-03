@@ -11,6 +11,7 @@ import { baseRegisterEvents } from './base.event.js'
 import { baseResponderHandler } from './base.responder.js'
 import ck from 'chalk'
 import glob from 'fast-glob'
+import { scheduleDollarExchangeRateMessage } from 'discord/services/currencyService.js'
 
 export const BASE_VERSION = '1.0.6' as const // DO NOT CHANGE THIS VAR
 
@@ -79,6 +80,7 @@ function createClient(token: string, options: BootstrapOptions) {
   )
 
   client.token = token
+
   client.on('ready', async (client) => {
     await client.guilds.fetch().catch(() => null)
 
@@ -88,6 +90,20 @@ function createClient(token: string, options: BootstrapOptions) {
 
     process.on('uncaughtException', (err) => baseErrorHandler(err, client))
     process.on('unhandledRejection', (err) => baseErrorHandler(err, client))
+
+    process.env.CURRENCY_CHANNELS_IDS?.split(',').forEach((id) => {
+      const channel = client.channels.cache.get(id)
+
+      if (!channel) {
+        logger.warn(`Channel with ID ${id} not found`)
+      }
+
+      if (channel?.isTextBased()) {
+        scheduleDollarExchangeRateMessage(client, id, '0 * * * 1-5') // every hour from Monday to Friday
+      } else {
+        logger.warn(`Channel with ID ${id} is not text-based`)
+      }
+    })
 
     options.whenReady?.(client)
   })
