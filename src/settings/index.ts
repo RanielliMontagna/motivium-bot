@@ -1,3 +1,4 @@
+/* eslint-disable */
 import settings from "../../settings.json" with { type: "json" };
 import { envSchema, type EnvSchema } from "./env.js";
 import { brBuilder } from "@magicyan/discord";

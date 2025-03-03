@@ -48,7 +48,7 @@ export async function baseCommandHandler(interaction: CommandInteraction){
     const command = baseStorage.commands.get(interaction.commandName);
 
     if (!command) {
-        onNotFound && onNotFound(interaction);
+        onNotFound?.(interaction);
         return;
     };
 

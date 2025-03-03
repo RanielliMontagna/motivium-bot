@@ -10,7 +10,7 @@ interface CommandCreatorOptions extends Partial<BaseStorageCommandConfig> {
     defaultMemberPermissions?: PermissionResolvable[];
 }
 
-interface ResponderCreatorOptions extends Partial<BaseStorageRespondersConfig> {}
+type ResponderCreatorOptions = Partial<BaseStorageRespondersConfig>
 
 interface SetupCreatorsOptions {
     commands?: CommandCreatorOptions;
