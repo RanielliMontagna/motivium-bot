@@ -2,7 +2,13 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 
 import 'dayjs/locale/pt-br.js'
+
+import utc from 'dayjs/plugin/utc.js'
+import timezone from 'dayjs/plugin/timezone.js'
+
 dayjs.locale('pt-br')
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 import { Client } from 'discord.js'
 import { scheduleMessage } from '#utils'
@@ -28,7 +34,9 @@ export function scheduleDollarExchangeRateMessage(
     cronExpression,
     message: async () => {
       const rate = await getDollarExchangeRate()
-      const now = dayjs().format('dddd, [dia] D [de] MMMM [de] YYYY [às] HH:mm')
+      const now = dayjs()
+        .tz('America/Sao_Paulo')
+        .format('dddd, [dia] D [de] MMMM [de] YYYY [às] HH:mm')
       const capitalizedNow = now.charAt(0).toUpperCase() + now.slice(1)
 
       const firstLine = `📅 ${capitalizedNow}`
