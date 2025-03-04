@@ -1,5 +1,7 @@
 import { Client, ClientOptions, version as djsVersion } from 'discord.js'
 import { baseErrorHandler, logger, validateEnv } from '#settings'
+import { scheduleDollarExchangeRateMessage } from '#services'
+
 import { CustomItents, CustomPartials } from '@magicyan/discord'
 import {
   baseAutocompleteHandler,
@@ -11,7 +13,6 @@ import { baseRegisterEvents } from './base.event.js'
 import { baseResponderHandler } from './base.responder.js'
 import ck from 'chalk'
 import glob from 'fast-glob'
-import { scheduleDollarExchangeRateMessage } from 'discord/services/currencyService.js'
 
 export const BASE_VERSION = '1.0.6' as const // DO NOT CHANGE THIS VAR
 

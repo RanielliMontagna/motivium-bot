@@ -1,6 +1,7 @@
 import cron from 'node-cron'
 import { Client, TextChannel } from 'discord.js'
-import { logger } from '../../settings/logger.js'
+
+import { logger } from '#settings'
 
 interface ScheduleMessageOptions {
   client: Client

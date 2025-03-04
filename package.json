@@ -47,6 +47,12 @@
     "#base": [
       "./build/discord/base/index.js"
     ],
+    "#services": [
+      "./build/discord/services/index.js"
+    ],
+    "#utils": [
+      "./build/discord/utils/index.js"
+    ],
     "#functions": [
       "./build/functions/index.js"
     ],
