@@ -1,11 +1,8 @@
 import axios from 'axios'
 import dayjs from 'dayjs'
 
-import 'dayjs/locale/pt-br'
-dayjs.locale('pt-br')
-
 import { Client } from 'discord.js'
-import { scheduleMessage } from 'discord/utils/scheduleMessage.js'
+import { scheduleMessage } from '#utils'
 
 export async function getDollarExchangeRate(): Promise<number> {
   try {
