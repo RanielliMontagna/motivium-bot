@@ -1,11 +1,11 @@
 version: '3.8'
 services:
   bot:
-    build: .
+    image: ${DOCKER_USERNAME}/motivium-bot:latest
     container_name: motivium-bot
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - NODE_OPTIONS=${NODE_OPTIONS}
       - MAIN_GUILD_ID=${MAIN_GUILD_ID}
       - CURRENCY_CHANNELS_IDS=${CURRENCY_CHANNELS_IDS}
-    restart: unless-stopped
+    restart: unless-stopped 

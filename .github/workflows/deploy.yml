@@ -1,0 +1,58 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
+          cache-to: type=inline
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          envs: DOCKER_USERNAME,BOT_TOKEN,NODE_OPTIONS,MAIN_GUILD_ID,CURRENCY_CHANNELS_IDS
+          script: |
+            mkdir -p /opt/motivium-bot
+            cd /opt/motivium-bot
+
+            # Create .env file with GitHub secrets
+            cat > .env << EOL
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}
+            MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }}
+            CURRENCY_CHANNELS_IDS=${{ secrets.CURRENCY_CHANNELS_IDS }}
+            EOL
+
+            # Download latest docker-compose.prod.yml
+            curl -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml
+
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
