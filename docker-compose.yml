@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  bot:
+    build: .
+    container_name: motivium-bot
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - NODE_OPTIONS=${NODE_OPTIONS}
+      - MAIN_GUILD_ID=${MAIN_GUILD_ID}
+      - CURRENCY_CHANNELS_IDS=${CURRENCY_CHANNELS_IDS}
+    volumes:
+      - ./.env:/usr/src/app/.env
