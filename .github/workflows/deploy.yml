@@ -36,27 +36,18 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
-          envs: DOCKER_USERNAME,BOT_TOKEN,NODE_OPTIONS,MAIN_GUILD_ID,CURRENCY_CHANNELS_IDS
           script: |
-            # Access the folder where the bot is located
-            cd /opt/motivium-bot
+            # Stop and remove the container
+            docker stop motivium-bot || true
+            docker rm motivium-bot || true
 
-            # Create .env file
-            cat > .env << EOL
-            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-            BOT_TOKEN=${{ secrets.BOT_TOKEN }}
-            NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}
-            MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }}
-            CURRENCY_CHANNELS_IDS=${{ secrets.CURRENCY_CHANNELS_IDS }}
-            EOL
-
-            # Download docker-compose.yml and Dockerfile
-            curl -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml
-            curl -o Dockerfile https://raw.githubusercontent.com/${{ github.repository }}/main/dockerfile
-
-            # Stop and remove the old container
-            docker-compose down --remove-orphans
-
-            # Pull and start the new container
-            docker-compose pull
-            docker-compose up -d
+            # Pull and run the new image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
+            docker run -d \
+              --name motivium-bot \
+              --restart unless-stopped \
+              -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
+              -e NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} \
+              -e MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }} \
+              -e CURRENCY_CHANNELS_IDS=${{ secrets.CURRENCY_CHANNELS_IDS }} \
+              ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
