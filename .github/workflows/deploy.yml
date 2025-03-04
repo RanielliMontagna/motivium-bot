@@ -50,8 +50,8 @@ jobs:
             CURRENCY_CHANNELS_IDS=${{ secrets.CURRENCY_CHANNELS_IDS }}
             EOL
 
-            # Download latest docker-compose.yml
-            curl -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+            # Download latest docker-compose.prod.yml
+            curl -o docker-compose.yml https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.prod.yml
 
             docker-compose pull
             docker-compose down
