@@ -100,7 +100,7 @@ function createClient(token: string, options: BootstrapOptions) {
       }
 
       if (channel?.isTextBased()) {
-        scheduleDollarExchangeRateMessage(client, id, '0 * * * 1-5') // every hour from Monday to Friday
+        scheduleDollarExchangeRateMessage(client, id, '0 9-18 * * 1-5')
       } else {
         logger.warn(`Channel with ID ${id} is not text-based`)
       }
