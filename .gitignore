@@ -21,3 +21,6 @@
 *.exe
 *.db
 *.development.json
+
+# Test
+coverage
