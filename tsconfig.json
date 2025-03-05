@@ -28,8 +28,9 @@
     "paths": {
       "#database": ["./database/index.ts"],
       "#base": ["./discord/base/index.ts"],
+      "#schedulers": ["./discord/schedulers/index.ts"],
       "#utils": ["./dircord/utils/index.ts"],
-      "#services": ["./dircord/services/index.ts"],
+      "#services": ["./services/index.ts"],
       "#functions": ["./functions/index.ts"],
       "#menus": ["./menus/index.ts"],
       "#settings": ["./settings/index.ts"],
@@ -38,7 +39,10 @@
       "#lib": ["./lib/index.ts"],
       "#emojis": ["../emojis.json"],
       "#types/*": ["./@types/*"]
-    }
+    },
+
+    // Additional options
+    "types": ["vitest/globals", "node"]
   },
 
   // Include and Exclude Options
