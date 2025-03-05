@@ -1,22 +1,25 @@
 # Motivium
 
-> [!NOTE]
+**Motivium** is a Discord bot created to test and learn about the Discord.js library. The idea is to create a centralized bot with multiple functionalities, such as commands, events, and responders.
+
+## 🚀 Features
+
+- [x] Ping command to test the bot's latency
+- [x] Currency schedule to send dollar conversion rates every 1 hour to a specific channel
+
+## 🏗️ Structure
+
+- [Commands](https://constatic-docs.vercel.app/docs/discord/commands) - Used to create commands that can be executed by users in the chat
+- [Responder](https://constatic-docs.vercel.app/docs/discord/responders) - Used to create responders that can be triggered by messages in the chat
+- [Events](https://constatic-docs.vercel.app/docs/discord/events) - Used to create events that can be triggered by the bot
+
 > This project **base** can be generated using the [Constant CLI](https://github.com/rinckodev/constatic)
-> See the full documentation for this base by accessing: https://constatic-docs.vercel.app/docs/discord/start
 
-This is the most complete discord bot base you've ever seen! Developed by [@rinckodev](https://github.com/rinckodev), this project uses typescript in an incredible way to provide complete structures and facilitate the development of your discord bot.
+## ❇️ Installation
 
-> [!WARNING] > [NodeJs](https://nodejs.org/en) version required: 20.12 or higher
+1. Clone the repository
+2. Install the dependencies
+3. Create a `.env` based on the `.env.example`
+4. Run the project
 
-## Scripts
-
-- `dev`: running bot in development
-- `build`: build the project
-- `watch`: running in watch mode
-- `start`: running the compiled bot
-
-## Structures
-
-- [Commands](https://constatic-docs.vercel.app/docs/discord/commands)
-- [Responder](https://constatic-docs.vercel.app/docs/discord/responders)
-- [Events](https://constatic-docs.vercel.app/docs/discord/events)
+> If configured correctly, the bot should be online and ready to use.
