@@ -47,8 +47,11 @@
     "#base": [
       "./build/discord/base/index.js"
     ],
+    "#schedulers": [
+      "./build/discord/schedulers/index.js"
+    ],
     "#services": [
-      "./build/discord/services/index.js"
+      "./build/services/index.js"
     ],
     "#utils": [
       "./build/discord/utils/index.js"
