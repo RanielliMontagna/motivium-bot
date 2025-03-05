@@ -5,6 +5,9 @@ const envSchema = z.object({
   WEBHOOK_LOGS_URL: z.string().url().optional(),
   MAIN_GUILD_ID: z.string().optional(),
   CURRENCY_CHANNELS_IDS: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  AI_CHANNELS_IDS: z.string().optional(),
   // Env vars...
 })
 
