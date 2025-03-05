@@ -5,6 +5,14 @@ import { logger } from '#settings'
 import { scheduleMessage } from '#utils'
 import { getDollarExchangeRate } from '#services'
 
+import 'dayjs/locale/pt-br.js'
+import utc from 'dayjs/plugin/utc.js'
+import timezone from 'dayjs/plugin/timezone.js'
+
+dayjs.locale('pt-br')
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 /**
  * Initializes the scheduler for currency channels
  * @param client Discord client
