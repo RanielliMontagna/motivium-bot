@@ -55,4 +55,7 @@ jobs:
               -e NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} \
               -e MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }} \
               -e CURRENCY_CHANNELS_IDS=${{ secrets.CURRENCY_CHANNELS_IDS }} \
+              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
+              -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
+              -e AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }} \
               ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
