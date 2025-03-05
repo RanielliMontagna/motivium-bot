@@ -39,7 +39,10 @@
       "#lib": ["./lib/index.ts"],
       "#emojis": ["../emojis.json"],
       "#types/*": ["./@types/*"]
-    }
+    },
+
+    // Additional options
+    "types": ["vitest/globals", "node"]
   },
 
   // Include and Exclude Options
