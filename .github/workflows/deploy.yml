@@ -1,14 +1,17 @@
 name: Deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ['Code Quality']
+    types:
+      - completed
     branches: [main]
 
 jobs:
   deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
-    needs: [quality]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout code
