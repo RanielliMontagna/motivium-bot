@@ -42,27 +42,18 @@ export async function getAIResponse(message: string) {
 
   logger.error('Error getting ChatGPT response:', chatGPTResult.error)
 
-  // Using Gemini as fallback AI
-  if (chatGPTResult.isQuotaError) {
-    logger.warn('ChatGPT quota exceeded, trying Gemini API')
+  logger.warn('ChatGPT failed, trying Gemini API')
 
-    const geminiResult = await tryGetGeminiResponse(message)
+  const geminiResult = await tryGetGeminiResponse(message)
 
-    if (geminiResult.success) {
-      return { success: true, response: geminiResult.response } as const
-    }
-
-    logger.error('Error getting Gemini response:', geminiResult.error)
-    return {
-      success: false,
-      error: geminiResult.error,
-      message: 'Desculpe, o serviço alternativo também não está disponível no momento.',
-    } as const
+  if (geminiResult.success) {
+    return { success: true, response: geminiResult.response } as const
   }
 
+  logger.error('Error getting Gemini response:', geminiResult.error)
   return {
     success: false,
-    error: chatGPTResult.error,
-    message: 'Desculpe, não consegui gerar uma resposta para sua mensagem.',
+    error: geminiResult.error,
+    message: 'Desculpe, não consegui encontrar uma resposta para isso 😔',
   } as const
 }
