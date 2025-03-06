@@ -58,4 +58,5 @@ jobs:
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
               -e AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }} \
+              -e NEWS_CHANNELS_IDS=${{ secrets.NEWS_CHANNELS_IDS }} \
               ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest

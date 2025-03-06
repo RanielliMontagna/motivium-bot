@@ -11,7 +11,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 import { Client } from 'discord.js'
-import { scheduleMessage } from '#utils'
+import { sendMessage } from '#utils'
 
 export async function getDollarExchangeRate(): Promise<number> {
   try {
@@ -23,15 +23,10 @@ export async function getDollarExchangeRate(): Promise<number> {
   }
 }
 
-export function scheduleDollarExchangeRateMessage(
-  client: Client,
-  channelId: string,
-  cronExpression: string,
-): void {
-  scheduleMessage({
+export function scheduleDollarExchangeRateMessage(client: Client, channelId: string): void {
+  sendMessage({
     client,
     channelId,
-    cronExpression,
     message: async () => {
       const rate = await getDollarExchangeRate()
       const now = dayjs()
