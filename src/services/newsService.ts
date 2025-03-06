@@ -20,36 +20,46 @@ const parser = new Parser()
 
 const theVergeURLBase = 'https://www.theverge.com/rss'
 
-const rssFeeds: RSSFeed[] = [
-  { url: `${theVergeURLBase}/tech/index.xml`, name: 'The Verge - Tech' },
-  { url: `${theVergeURLBase}/ai-artificial-intelligence/index.xml`, name: 'The Verge - AI' },
-]
+const techFeed: RSSFeed = {
+  url: `${theVergeURLBase}/tech/index.xml`,
+  name: 'The Verge - Tech',
+}
 
-async function getRSSNews(): Promise<NewsArticle[]> {
+const aiFeed: RSSFeed = {
+  url: `${theVergeURLBase}/ai-artificial-intelligence/index.xml`,
+  name: 'The Verge - AI',
+}
+
+async function getTechNews(): Promise<NewsArticle[]> {
+  return getRSSNews(techFeed)
+}
+
+async function getAINews(): Promise<NewsArticle[]> {
+  return getRSSNews(aiFeed)
+}
+
+async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
   try {
     const articles: NewsArticle[] = []
+    const feedContent = await parser.parseURL(feed.url)
 
-    for (const feed of rssFeeds) {
-      const feedContent = await parser.parseURL(feed.url)
-
-      for (const item of feedContent.items) {
-        articles.push({
-          title: item.title || '',
-          contentSnippet: item.contentSnippet || '',
-          content: item.content || '',
-          summary: item.summary || '',
-          url: item.link || '',
-          publishedAt: item.pubDate ? dayjs(item.pubDate) : dayjs(),
-          source: { name: feed.name },
-        })
-      }
+    for (const item of feedContent.items) {
+      articles.push({
+        title: item.title || '',
+        contentSnippet: item.contentSnippet || '',
+        content: item.content || '',
+        summary: item.summary || '',
+        url: item.link || '',
+        publishedAt: item.pubDate ? dayjs(item.pubDate) : dayjs(),
+        source: { name: feed.name },
+      })
     }
 
     return articles.sort((a, b) => b.publishedAt.diff(a.publishedAt))
   } catch (error) {
-    console.error('Error fetching RSS news:', error)
+    console.error(`Error fetching RSS news from ${feed.name}:`, error)
     return []
   }
 }
 
-export { getRSSNews }
+export { getRSSNews, getTechNews, getAINews }
