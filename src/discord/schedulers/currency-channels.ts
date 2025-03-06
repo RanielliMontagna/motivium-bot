@@ -38,18 +38,18 @@ export async function scheduleDollarExchangeRateMessage(client: Client): Promise
 
   await Promise.all(
     currencyChannelsIds.map(async (channelId) => {
-      formatDollarMessage(data, channelId)
+      formatDollarMessage(data)
 
       await sendMessage({
         client,
         channelId,
-        message: formatDollarMessage(data, channelId),
+        message: formatDollarMessage(data),
       })
     }),
   )
 }
 
-function formatDollarMessage(data: DollarExchangeRateResponse, channelId: string): string {
+function formatDollarMessage(data: DollarExchangeRateResponse): string {
   const now = dayjs().tz('America/Sao_Paulo').format('dddd, [dia] D [de] MMMM [de] YYYY [às] HH:mm')
   const isFirstHour = dayjs().tz('America/Sao_Paulo').hour() === 9
   const isLastHour = dayjs().tz('America/Sao_Paulo').hour() === 18
