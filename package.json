@@ -27,6 +27,7 @@
     "dayjs": "^1.11.13",
     "discord.js": "14.18.0",
     "fast-glob": "3.3.3",
+    "node-cache": "5.1.2",
     "node-cron": "^3.0.3",
     "openai": "4.86.1",
     "quick.db": "^9.1.7",

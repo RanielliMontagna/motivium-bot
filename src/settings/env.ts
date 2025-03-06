@@ -9,6 +9,10 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   AI_CHANNELS_IDS: z.string().optional(),
+  AI_NEWS_CHANNELS_IDS: z.string().optional(),
+  TECH_NEWS_CHANNELS_IDS: z.string().optional(),
+  SPACE_NEWS_CHANNELS_IDS: z.string().optional(),
+  ECONOMY_NEWS_CHANNELS_IDS: z.string().optional(),
   // Env vars...
 })
 
