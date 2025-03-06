@@ -1,5 +1,5 @@
-// Currency Service
-export * from './currencyService.js'
+// Economy Services
+export * from './economy/dollarExchangeService.js'
 
 // AI Services
 export * from './ai/openai.js'
