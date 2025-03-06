@@ -12,6 +12,7 @@ import { baseRegisterEvents } from './base.event.js'
 import { baseResponderHandler } from './base.responder.js'
 import ck from 'chalk'
 import glob from 'fast-glob'
+
 import { initializeCurrencyChannelsScheduler, initializeNewsChannelsScheduler } from '#schedulers'
 
 export const BASE_VERSION = '1.0.6' as const // DO NOT CHANGE THIS VAR

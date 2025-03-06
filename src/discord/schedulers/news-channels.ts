@@ -1,12 +1,9 @@
-import dayjs from 'dayjs'
 import cron from 'node-cron'
 import { Client } from 'discord.js'
 
 import { logger } from '#settings'
 import { sendMessage } from '#utils'
 import { getRSSNews } from '#services'
-
-dayjs.locale('pt-br')
 
 const sentNews = new Set<string>()
 const MAX_NEWS_HISTORY = 50 // Maximum number of news articles to keep in memory
