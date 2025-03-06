@@ -1,115 +1,98 @@
 import cron from 'node-cron'
+import NodeCache from 'node-cache'
 import { Client } from 'discord.js'
 
 import { logger } from '#settings'
 import { sendMessage } from '#utils'
-import { getAINews, getSpaceNews, getTechNews, NewsArticle } from '#services'
+import { getAINews, getEconomyNews, getSpaceNews, getTechNews, NewsArticle } from '#services'
 
-const sentNews = new Set<string>()
-const MAX_NEWS_HISTORY = 50 // Maximum number of news articles to keep in memory
+// Cache with a TTL of 24h and a check period of 1h
+const newsCache = new NodeCache({ stdTTL: 86400, checkperiod: 3600 })
 
 /**
- * Initializes the scheduler for news channels
+ * Initializes the scheduler for news channels.
  * @param client Discord client
  */
 export async function initializeNewsChannelsScheduler(client: Client) {
-  const aiNewsChannelIds = process.env.AI_NEWS_CHANNELS_IDS?.split(',')
-  const techNewsChannelIds = process.env.TECH_NEWS_CHANNELS_IDS?.split(',')
-  const spaceNewsChannelIds = process.env.SPACE_NEWS_CHANNELS_IDS?.split(',')
-  // const economyNewsChannelIds = process.env.ECONOMY_NEWS_CHANNELS_IDS?.split(',')
+  const categories = [
+    { env: 'AI_NEWS_CHANNELS_IDS', fetchNews: getAINews, name: 'AI' },
+    { env: 'TECH_NEWS_CHANNELS_IDS', fetchNews: getTechNews, name: 'Tech' },
+    { env: 'SPACE_NEWS_CHANNELS_IDS', fetchNews: getSpaceNews, name: 'Space' },
+    { env: 'ECONOMY_NEWS_CHANNELS_IDS', fetchNews: getEconomyNews, name: 'Economy' },
+  ]
 
-  if (!aiNewsChannelIds?.length) {
-    logger.warn('No AI channels configured')
-  } else {
-    scheduleNewsChannels(client, aiNewsChannelIds, getAINews)
-  }
-
-  if (!techNewsChannelIds?.length) {
-    logger.warn('No tech channels configured')
-  } else {
-    scheduleNewsChannels(client, techNewsChannelIds, getTechNews)
-  }
-
-  if (!spaceNewsChannelIds?.length) {
-    logger.warn('No space channels configured')
-  } else {
-    scheduleNewsChannels(client, spaceNewsChannelIds, getSpaceNews)
-  }
+  categories.forEach(({ env, fetchNews, name }) => {
+    const channelIds = process.env[env]?.split(',')
+    if (!channelIds?.length) {
+      logger.warn(`No ${name} channels configured`)
+      return
+    }
+    scheduleNewsChannels(client, channelIds, fetchNews)
+  })
 }
 
+/**
+ * @description Schedule news messages for the given channels.
+ */
 function scheduleNewsChannels(
   client: Client,
   channelIds: string[],
   getNewsFunction: () => Promise<NewsArticle[]>,
-): void {
-  channelIds.forEach((id) => {
-    const channel = client.channels.cache.get(id)
+) {
+  channelIds.forEach((channelId) => {
+    const channel = client.channels.cache.get(channelId)
 
-    if (!channel) {
-      logger.warn(`Channel with ID ${id} not found`)
+    if (!channel || !channel.isTextBased()) {
+      logger.warn(`Channel with ID ${channelId} not found or not text-based`)
       return
     }
 
-    if (channel.isTextBased()) {
-      // Send news message immediately
-      scheduleNewsMessage(client, id, getNewsFunction)
+    scheduleNewsMessage(client, channelId, getNewsFunction)
 
-      // Schedule news message every hour
-      cron.schedule('0 * * * *', async () => scheduleNewsMessage(client, id, getNewsFunction), {
-        timezone: 'America/Sao_Paulo',
-      })
-    } else {
-      logger.warn(`Channel with ID ${id} is not text-based`)
-    }
+    cron.schedule('0 * * * *', () => scheduleNewsMessage(client, channelId, getNewsFunction), {
+      timezone: 'America/Sao_Paulo',
+    })
   })
 }
 
+/**
+ * Get and send a news article to the channel, ensuring it is not repeated.
+ */
 async function scheduleNewsMessage(
   client: Client,
   channelId: string,
   getNewsFunction: () => Promise<NewsArticle[]>,
-): Promise<void> {
-  const articles = await getNewsFunction()
-
-  if (!articles.length) {
-    logger.warn('No news articles found')
-    return
-  }
-
-  const newArticles = articles.filter((article) => {
-    if (sentNews.has(article.url)) {
-      logger.log(`News article already sent: ${article.url}`)
-      return false
+) {
+  try {
+    const articles = await getNewsFunction()
+    if (!articles.length) {
+      logger.warn('No news articles found')
+      return
     }
 
-    return true
-  })
+    const newArticles = articles.filter((article) => !newsCache.has(article.url))
+    if (newArticles.length === 0) {
+      logger.warn('No new news articles available')
+      return
+    }
 
-  if (newArticles.length === 0) {
-    logger.warn('No new news articles available')
-    return
+    const article = newArticles[0]
+    newsCache.set(article.url, true)
+
+    const image = article.content.match(/<img[^>]+src="([^"]+)"/)?.[1].split('?')[0] ?? ''
+
+    const sourceFormatted = `-# 🗞️ Fonte: [${article.source.name}](<${article.url}>)`
+    const publishedAtDate = article.publishedAt.format('DD/MM/YYYY [às] HH:mm')
+    const message = `${article.summary}\n\n${sourceFormatted} • ${publishedAtDate}`
+
+    sendMessage({
+      client,
+      channelId,
+      imageUrl: image,
+      title: `📰 ${article.title}`,
+      message,
+    })
+  } catch (error) {
+    logger.error(`Error sending news message to channel ${channelId}:`, error)
   }
-
-  const article = newArticles[0]
-  sentNews.add(article.url)
-
-  if (sentNews.size > MAX_NEWS_HISTORY) {
-    const firstKey = sentNews.values().next().value
-    sentNews.delete(firstKey!)
-  }
-
-  const image = article.content.match(/<img[^>]+src="([^"]+)"/)?.[1].split('?')[0] ?? ''
-
-  const sourceFormatted = `-# 🗞️ Font: [${article.source.name}](<${article.url}>)`
-  const publishedAtDate = article.publishedAt.format('DD/MM/YYYY [at] HH:mm')
-  const capitalizedDate = publishedAtDate.charAt(0).toUpperCase() + publishedAtDate.slice(1)
-  const message = `${article.summary}\n\n${sourceFormatted} • ${capitalizedDate}`
-
-  sendMessage({
-    client,
-    channelId,
-    imageUrl: image,
-    title: `📰 ${article.title}`,
-    message,
-  })
 }

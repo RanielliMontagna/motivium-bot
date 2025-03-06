@@ -18,30 +18,6 @@ interface RSSFeed {
 
 const parser = new Parser()
 
-const theVergeURLBase = 'https://www.theverge.com/rss'
-
-const techFeed: RSSFeed = {
-  url: `${theVergeURLBase}/tech/index.xml`,
-  name: 'The Verge - Tech',
-}
-
-const aiFeed: RSSFeed = {
-  url: `${theVergeURLBase}/ai-artificial-intelligence/index.xml`,
-  name: 'The Verge - AI',
-}
-
-async function getTechNews(): Promise<NewsArticle[]> {
-  return getRSSNews(techFeed)
-}
-
-async function getAINews(): Promise<NewsArticle[]> {
-  return getRSSNews(aiFeed)
-}
-
-async function getSpaceNews(): Promise<NewsArticle[]> {
-  return getRSSNews({ url: `${theVergeURLBase}/space/index.xml`, name: 'The Verge - Space' })
-}
-
 async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
   try {
     const articles: NewsArticle[] = []
@@ -66,4 +42,41 @@ async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
   }
 }
 
-export { getRSSNews, getTechNews, getAINews, getSpaceNews }
+const theVergeURLBase = 'https://www.theverge.com/rss'
+const investingURLBase = 'https://br.investing.com/rss'
+
+async function getTechNews(): Promise<NewsArticle[]> {
+  const techFeeds = [{ url: `${theVergeURLBase}/tech/index.xml`, name: 'The Verge - Tech' }]
+  const techNews = await Promise.all(techFeeds.map((feed) => getRSSNews(feed)))
+
+  return techNews.flat()
+}
+
+async function getAINews(): Promise<NewsArticle[]> {
+  const aiFeeds = [
+    { url: `${theVergeURLBase}/ai-artificial-intelligence/index.xml`, name: 'The Verge - AI' },
+  ]
+  const aiNews = await Promise.all(aiFeeds.map((feed) => getRSSNews(feed)))
+
+  return aiNews.flat()
+}
+
+async function getSpaceNews(): Promise<NewsArticle[]> {
+  const spaceFeeds = [{ url: `${theVergeURLBase}/space/index.xml`, name: 'The Verge - Space' }]
+  const spaceNews = await Promise.all(spaceFeeds.map((feed) => getRSSNews(feed)))
+
+  return spaceNews.flat()
+}
+
+async function getEconomyNews(): Promise<NewsArticle[]> {
+  const economyFeeds = [
+    { url: `${investingURLBase}/news_301.rss`, name: 'Investing.com - Cryptocurrency' },
+    { url: `${investingURLBase}/news_14.rss`, name: 'Investing.com - Economy' },
+    { url: `${investingURLBase}/news_1.rss`, name: 'Investing.com - Currency Exchange' },
+  ]
+  const economyNews = await Promise.all(economyFeeds.map((feed) => getRSSNews(feed)))
+
+  return economyNews.flat()
+}
+
+export { getRSSNews, getTechNews, getAINews, getSpaceNews, getEconomyNews }
