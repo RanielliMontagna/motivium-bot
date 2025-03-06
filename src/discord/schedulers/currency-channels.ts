@@ -2,13 +2,17 @@ import dayjs from 'dayjs'
 import cron from 'node-cron'
 import { Client, Colors } from 'discord.js'
 
-import { logger } from '#settings'
-import { DollarExchangeRateResponse, getDollarExchangeRate } from '#services'
-
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
+
 import { sendMessage } from '#utils'
-import { CoinGeckoCoin, getCoinData } from 'services/economy/coinGeckoService.js'
+import { logger } from '#settings'
+import {
+  DollarExchangeRateResponse,
+  getDollarExchangeRate,
+  CoinGeckoCoin,
+  getCoinData,
+} from '#services'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)

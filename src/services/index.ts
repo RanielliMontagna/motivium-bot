@@ -1,5 +1,6 @@
 // Economy Services
 export * from './economy/dollarExchangeService.js'
+export * from './economy/coinGeckoService.js'
 
 // AI Services
 export * from './ai/openai.js'
