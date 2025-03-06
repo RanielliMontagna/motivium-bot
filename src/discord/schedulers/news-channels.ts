@@ -47,8 +47,6 @@ function scheduleNewsChannels(
       return
     }
 
-    scheduleNewsMessage(client, channelId, getNewsFunction)
-
     cron.schedule('0 * * * *', () => scheduleNewsMessage(client, channelId, getNewsFunction), {
       timezone: 'America/Sao_Paulo',
     })

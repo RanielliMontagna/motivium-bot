@@ -1,25 +1,26 @@
 import dayjs from 'dayjs'
 import cron from 'node-cron'
-import NodeCache from 'node-cache'
 import { Client } from 'discord.js'
 
 import { logger } from '#settings'
-import { sendMessage } from '#utils'
 import { DollarExchangeRateResponse, getDollarExchangeRate } from '#services'
 
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
+import { sendMessage } from '#utils'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
-
-const cache = new NodeCache({ stdTTL: 60 * 60 * 24 }) // 24 hours
 
 /**
  * Initializes the scheduler for currency channels
  * @param client Discord client
  */
 export async function initializeCurrencyChannelsScheduler(client: Client) {
+  cron.schedule('*/5 * * * * *', async () => {
+    scheduleDollarExchangeRateMessage(client)
+  })
+
   cron.schedule('0 9-18 * * 1-5', async () => scheduleDollarExchangeRateMessage(client), {
     timezone: 'America/Sao_Paulo',
   })
@@ -37,6 +38,8 @@ export async function scheduleDollarExchangeRateMessage(client: Client): Promise
 
   await Promise.all(
     currencyChannelsIds.map(async (channelId) => {
+      formatDollarMessage(data, channelId)
+
       await sendMessage({
         client,
         channelId,
@@ -51,22 +54,21 @@ function formatDollarMessage(data: DollarExchangeRateResponse, channelId: string
   const isFirstHour = dayjs().tz('America/Sao_Paulo').hour() === 9
   const isLastHour = dayjs().tz('America/Sao_Paulo').hour() === 18
 
-  const capitalizedNow = now.charAt(0).toUpperCase() + now.slice(1)
+  const capitalizedNow = `-# ${now.charAt(0).toUpperCase() + now.slice(1)}`
   const title = '💵 **Cotação do Dólar** 💵'
 
-  const lastBid = cache.get<number>(`lastBid_${channelId}`)
-  const varBid = lastBid ? +(Number(data.bid) - lastBid).toFixed(2) : 0
+  const bidFormatted = parseFloat(data.bid).toFixed(2).replace('.', ',')
 
-  let description = `O valor do dólar no momento é: **R$ ${data.bid}** ${
-    varBid > 0 ? `(+${varBid})` : varBid < 0 ? `(${varBid})` : ''
-  }`
+  let description = `O valor do dólar no momento é: **R$ ${bidFormatted}**`
+  if (isFirstHour) description = `O mercado abriu com o dólar valendo: **R$ ${bidFormatted}**`
+  if (isLastHour) description = `O mercado fechou com o dólar valendo: **R$ ${bidFormatted}**`
 
-  if (isFirstHour) description = `O mercado abriu com o dólar valendo: **R$ ${data.bid}**`
-  if (isLastHour) description = `O mercado fechou com o dólar valendo: **R$ ${data.bid}**`
+  const dayVariation = parseFloat(data.pctChange)
+  const variation =
+    dayVariation > 0 ? `📈 **${dayVariation.toFixed(2)}%**` : `📉 **${dayVariation.toFixed(2)}%**`
+  const variationText = `Variação do dia: ${variation}`
 
-  const font = `-# 📈 Fonte: [AwesomeAPI](<https://docs.awesomeapi.com.br/>)`
+  const font = `-# 🗞️ Fonte: [AwesomeAPI](<https://docs.awesomeapi.com.br/>)`
 
-  cache.set(`lastBid_${channelId}`, data.bid)
-
-  return `📅 ${capitalizedNow}\n\n${title}\n${description}\n\n${font}`
+  return `${capitalizedNow}\n\n${title}\n${description}\n${variationText}\n\n${font}`
 }
