@@ -56,7 +56,7 @@ jobs:
               -e MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }} \
               -e CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS=${{ secrets.CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS }} \
               -e CURRENCY_BTC_CHANNEL_IDS=${{ secrets.CURRENCY_BTC_CHANNEL_IDS }} \
-              -e COIN_GECKO_API_KEY=${{ secretes.COIN_GECKO_API_KEY }} \
+              -e COIN_GECKO_API_KEY=${{ secrets.COIN_GECKO_API_KEY }} \
               -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
               -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
               -e AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }} \
