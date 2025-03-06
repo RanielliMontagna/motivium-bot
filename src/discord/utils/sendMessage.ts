@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, TextChannel } from 'discord.js'
+import { Client, ColorResolvable, Colors, EmbedBuilder, TextChannel } from 'discord.js'
 
 import { logger } from '#settings'
 
@@ -9,6 +9,7 @@ interface ScheduleMessageOptions {
   message: string | (() => Promise<string>)
   footer?: string
   imageUrl?: string | (() => Promise<string | undefined>)
+  color?: ColorResolvable
 }
 
 export async function sendMessage({
@@ -18,6 +19,7 @@ export async function sendMessage({
   message,
   footer,
   imageUrl,
+  color = Colors.Blue,
 }: ScheduleMessageOptions): Promise<void> {
   const channel = client.channels.cache.get(channelId) as TextChannel
 
@@ -30,7 +32,7 @@ export async function sendMessage({
           : imageUrl
         : undefined
 
-      const embed = new EmbedBuilder().setDescription(finalMessage).setColor(0x0099ff)
+      const embed = new EmbedBuilder().setDescription(finalMessage).setColor(color)
 
       if (title) embed.setTitle(title)
       if (finalImageUrl) embed.setImage(finalImageUrl)
