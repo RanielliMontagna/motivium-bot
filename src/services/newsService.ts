@@ -38,6 +38,10 @@ async function getAINews(): Promise<NewsArticle[]> {
   return getRSSNews(aiFeed)
 }
 
+async function getSpaceNews(): Promise<NewsArticle[]> {
+  return getRSSNews({ url: `${theVergeURLBase}/space/index.xml`, name: 'The Verge - Space' })
+}
+
 async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
   try {
     const articles: NewsArticle[] = []
@@ -62,4 +66,4 @@ async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
   }
 }
 
-export { getRSSNews, getTechNews, getAINews }
+export { getRSSNews, getTechNews, getAINews, getSpaceNews }

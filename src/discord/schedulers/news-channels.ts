@@ -3,7 +3,7 @@ import { Client } from 'discord.js'
 
 import { logger } from '#settings'
 import { sendMessage } from '#utils'
-import { getRSSNews } from '#services'
+import { getAINews, getSpaceNews, getTechNews, NewsArticle } from '#services'
 
 const sentNews = new Set<string>()
 const MAX_NEWS_HISTORY = 50 // Maximum number of news articles to keep in memory
@@ -13,14 +13,36 @@ const MAX_NEWS_HISTORY = 50 // Maximum number of news articles to keep in memory
  * @param client Discord client
  */
 export async function initializeNewsChannelsScheduler(client: Client) {
-  const newsChannelsIds = process.env.NEWS_CHANNELS_IDS?.split(',')
+  const aiNewsChannelIds = process.env.AI_NEWS_CHANNELS_IDS?.split(',')
+  const techNewsChannelIds = process.env.TECH_NEWS_CHANNELS_IDS?.split(',')
+  const spaceNewsChannelIds = process.env.SPACE_NEWS_CHANNELS_IDS?.split(',')
+  // const economyNewsChannelIds = process.env.ECONOMY_NEWS_CHANNELS_IDS?.split(',')
 
-  if (!newsChannelsIds?.length) {
-    logger.warn('No news channels configured')
-    return
+  if (!aiNewsChannelIds?.length) {
+    logger.warn('No AI channels configured')
+  } else {
+    scheduleNewsChannels(client, aiNewsChannelIds, getAINews)
   }
 
-  newsChannelsIds.forEach((id) => {
+  if (!techNewsChannelIds?.length) {
+    logger.warn('No tech channels configured')
+  } else {
+    scheduleNewsChannels(client, techNewsChannelIds, getTechNews)
+  }
+
+  if (!spaceNewsChannelIds?.length) {
+    logger.warn('No space channels configured')
+  } else {
+    scheduleNewsChannels(client, spaceNewsChannelIds, getSpaceNews)
+  }
+}
+
+function scheduleNewsChannels(
+  client: Client,
+  channelIds: string[],
+  getNewsFunction: () => Promise<NewsArticle[]>,
+): void {
+  channelIds.forEach((id) => {
     const channel = client.channels.cache.get(id)
 
     if (!channel) {
@@ -29,7 +51,11 @@ export async function initializeNewsChannelsScheduler(client: Client) {
     }
 
     if (channel.isTextBased()) {
-      cron.schedule('0 * * * *', async () => scheduleNewsMessage(client, id), {
+      // Send news message immediately
+      scheduleNewsMessage(client, id, getNewsFunction)
+
+      // Schedule news message every hour
+      cron.schedule('0 * * * *', async () => scheduleNewsMessage(client, id, getNewsFunction), {
         timezone: 'America/Sao_Paulo',
       })
     } else {
@@ -38,8 +64,12 @@ export async function initializeNewsChannelsScheduler(client: Client) {
   })
 }
 
-async function scheduleNewsMessage(client: Client, channelId: string): Promise<void> {
-  const articles = await getRSSNews()
+async function scheduleNewsMessage(
+  client: Client,
+  channelId: string,
+  getNewsFunction: () => Promise<NewsArticle[]>,
+): Promise<void> {
+  const articles = await getNewsFunction()
 
   if (!articles.length) {
     logger.warn('No news articles found')
@@ -57,6 +87,7 @@ async function scheduleNewsMessage(client: Client, channelId: string): Promise<v
 
   if (newArticles.length === 0) {
     logger.warn('No new news articles available')
+    return
   }
 
   const article = newArticles[0]
