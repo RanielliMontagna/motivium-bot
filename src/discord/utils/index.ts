@@ -1,1 +1,1 @@
-export * from './scheduleMessage.js'
+export * from './sendMessage.js'

@@ -1,15 +1,14 @@
 import dayjs from 'dayjs'
+import cron from 'node-cron'
 import { Client } from 'discord.js'
 
 import { logger } from '#settings'
-import { scheduleMessage } from '#utils'
+import { sendMessage } from '#utils'
 import { getDollarExchangeRate } from '#services'
 
-import 'dayjs/locale/pt-br.js'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
-dayjs.locale('pt-br')
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -34,22 +33,19 @@ export async function initializeCurrencyChannelsScheduler(client: Client) {
     }
 
     if (channel.isTextBased()) {
-      scheduleDollarExchangeRateMessage(client, id, '0 9-18 * * 1-5') // Every hour from 9am to 6pm on weekdays
+      cron.schedule('0 9-18 * * 1-5', async () => scheduleDollarExchangeRateMessage(client, id), {
+        timezone: 'America/Sao_Paulo',
+      })
     } else {
       logger.warn(`Channel with ID ${id} is not text-based`)
     }
   })
 }
 
-export function scheduleDollarExchangeRateMessage(
-  client: Client,
-  channelId: string,
-  cronExpression: string,
-): void {
-  scheduleMessage({
+export function scheduleDollarExchangeRateMessage(client: Client, channelId: string): void {
+  sendMessage({
     client,
     channelId,
-    cronExpression,
     message: async () => {
       const rate = await getDollarExchangeRate()
       const now = dayjs()
