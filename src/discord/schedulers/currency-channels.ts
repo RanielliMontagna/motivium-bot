@@ -17,10 +17,6 @@ dayjs.extend(timezone)
  * @param client Discord client
  */
 export async function initializeCurrencyChannelsScheduler(client: Client) {
-  cron.schedule('*/5 * * * * *', async () => {
-    scheduleDollarExchangeRateMessage(client)
-  })
-
   cron.schedule('0 9-18 * * 1-5', async () => scheduleDollarExchangeRateMessage(client), {
     timezone: 'America/Sao_Paulo',
   })
