@@ -1,2 +1,2 @@
-export * from './currency-channels.js'
-export * from './news-channels.js'
+export * from './currency-channels/currency-channels.js'
+export * from './news-channels/news-channels.js'

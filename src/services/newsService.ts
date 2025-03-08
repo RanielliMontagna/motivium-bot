@@ -35,7 +35,11 @@ async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
       })
     }
 
-    return articles.sort((a, b) => b.publishedAt.diff(a.publishedAt))
+    const sortedArticles = articles.sort((a, b) => b.publishedAt.diff(a.publishedAt))
+    const todayArticles = sortedArticles.filter((a) => a.publishedAt.isSame(dayjs(), 'day'))
+
+    // Return only articles published today to avoid old news
+    return todayArticles
   } catch (error) {
     console.error(`Error fetching RSS news from ${feed.name}:`, error)
     return []
