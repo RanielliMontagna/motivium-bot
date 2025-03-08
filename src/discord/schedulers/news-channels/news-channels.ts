@@ -1,3 +1,4 @@
+import he from 'he'
 import cron from 'node-cron'
 import NodeCache from 'node-cache'
 import { Client } from 'discord.js'
@@ -59,6 +60,8 @@ function scheduleNewsChannels({
       return
     }
 
+    scheduleNewsMessage({ client, category, channelId, getNewsFunction })
+
     cron.schedule(
       '0 * * * *', // Send news every hour
       () => scheduleNewsMessage({ client, category, channelId, getNewsFunction }),
@@ -97,7 +100,11 @@ async function scheduleNewsMessage({
 
     const sourceFormatted = `-# 🗞️ Fonte: [${article.source.name}](<${article.url}>)`
     const publishedAtDate = article.publishedAt.format('DD/MM/YYYY [às] HH:mm')
-    const message = `${article.summary}\n\n${sourceFormatted} • ${publishedAtDate}`
+
+    const rawSummary = article.summary
+    const cleanSummary = he.decode(rawSummary)
+
+    const message = `${cleanSummary}\n\n${sourceFormatted} • ${publishedAtDate}`
 
     sendMessage({
       client,
