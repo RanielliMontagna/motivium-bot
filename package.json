@@ -27,6 +27,7 @@
     "dayjs": "^1.11.13",
     "discord.js": "14.18.0",
     "fast-glob": "3.3.3",
+    "he": "1.2.0",
     "node-cache": "5.1.2",
     "node-cron": "^3.0.3",
     "openai": "4.86.1",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@types/he": "1.2.3",
     "@types/node": "20.17.12",
     "@vitest/coverage-v8": "3.0.7",
     "eslint": "^9.21.0",
