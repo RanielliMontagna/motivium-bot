@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { axiosInstance } from '#libs'
 
 export interface CoinGeckoCoin {
   usd: number
@@ -10,7 +10,7 @@ const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3'
 
 export const getCoinData = async (coinId: string): Promise<CoinGeckoCoin> => {
   try {
-    const response = (await axios.get(`${COINGECKO_API_URL}/simple/price`, {
+    const response = (await axiosInstance.get(`${COINGECKO_API_URL}/simple/price`, {
       params: {
         ids: coinId,
         vs_currencies: 'usd',

@@ -64,6 +64,9 @@
     "#services": [
       "./build/services/index.js"
     ],
+    "#libs": [
+      "./build/libs/index.js"
+    ],
     "#utils": [
       "./build/discord/utils/index.js"
     ],
