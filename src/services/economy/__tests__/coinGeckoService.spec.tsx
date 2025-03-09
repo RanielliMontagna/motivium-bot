@@ -8,6 +8,10 @@ const mock = new AxiosMockAdapter(axiosInstance)
 const coinId = 'bitcoin'
 
 describe('coinGeckoService', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
   it('should fetch coin data', async () => {
     mock.onGet(COINGECKO_SIMPLE_PRICE_URL).reply(200, {
       [coinId]: {
