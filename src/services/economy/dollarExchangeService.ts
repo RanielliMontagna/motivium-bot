@@ -14,9 +14,12 @@ export interface DollarExchangeRateResponse {
   create_date: string
 }
 
+export const AWESOME_API_URL = 'https://economia.awesomeapi.com.br'
+export const AWESOME_API_DOLLAR_EXCHANGE_URL = `${AWESOME_API_URL}/json/last/USD-BRL`
+
 export async function getDollarExchangeRate(): Promise<DollarExchangeRateResponse> {
   try {
-    const response = await axiosInstance.get('https://economia.awesomeapi.com.br/json/last/USD-BRL')
+    const response = await axiosInstance.get(AWESOME_API_DOLLAR_EXCHANGE_URL)
 
     if (response.data.USDBRL) {
       return response.data.USDBRL
@@ -25,6 +28,6 @@ export async function getDollarExchangeRate(): Promise<DollarExchangeRateRespons
     throw new Error('Failed to fetch dollar exchange rate')
   } catch (error) {
     console.error('Error fetching dollar exchange rate:', error)
-    throw new Error('Failed to fetch dollar exchange rate')
+    throw error
   }
 }

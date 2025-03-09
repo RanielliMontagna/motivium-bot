@@ -6,11 +6,12 @@ export interface CoinGeckoCoin {
   last_updated_at: number
 }
 
-const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3'
+export const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3'
+export const COINGECKO_SIMPLE_PRICE_URL = `${COINGECKO_API_URL}/simple/price`
 
 export const getCoinData = async (coinId: string): Promise<CoinGeckoCoin> => {
   try {
-    const response = (await axiosInstance.get(`${COINGECKO_API_URL}/simple/price`, {
+    const response = (await axiosInstance.get(COINGECKO_SIMPLE_PRICE_URL, {
       params: {
         ids: coinId,
         vs_currencies: 'usd',
