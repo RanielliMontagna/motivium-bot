@@ -20,6 +20,10 @@ const USDBRL = {
 }
 
 describe('dollarExchangeService', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
   it('should fetch dollar exchange rate', async () => {
     mock.onGet(AWESOME_API_DOLLAR_EXCHANGE_URL).reply(200, { USDBRL })
 
