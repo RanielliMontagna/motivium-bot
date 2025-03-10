@@ -9,7 +9,9 @@ WORKDIR /usr/src/app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+COPY prisma ./prisma
+
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
@@ -26,9 +28,11 @@ WORKDIR /usr/src/app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod
+COPY prisma ./prisma
+
+RUN pnpm install --frozen-lockfile
 
 COPY --from=builder /usr/src/app/build ./build
 COPY --from=builder /usr/src/app/settings.json ./settings.json
 
-CMD ["node", "build/index.js"]
+CMD ["pnpm", "start:migrate:prod"]
