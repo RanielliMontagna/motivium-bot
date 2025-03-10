@@ -41,12 +41,17 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
+          source: docker-compose.prod.yml
+          target: /opt/motivium-bot/
           script: |
+            # Open the directory where the docker-compose file is located
+            cd /opt/motivium-bot
+
             # Stop and remove the container if already running
-            docker-compose -f docker-compose.yml down || true
+            docker-compose -f docker-compose.prod.yml down || true
 
             # Pull the latest images
-            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.prod.yml pull
 
             # Start the container using docker-compose
-            docker-compose -f docker-compose.yml up -d
+            docker-compose -f docker-compose.prod.yml up -d
