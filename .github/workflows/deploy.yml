@@ -35,60 +35,21 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
           cache-to: type=inline
 
-      - name: Generate .env file for production
-        run: |
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > .env
-          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
-          echo "NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}" >> .env
-          echo "MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }}" >> .env
-          echo "CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS=${{ secrets.CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS }}" >> .env
-          echo "CURRENCY_BTC_CHANNEL_IDS=${{ secrets.CURRENCY_BTC_CHANNEL_IDS }}" >> .env
-          echo "COIN_GECKO_API_KEY=${{ secrets.COIN_GECKO_API_KEY }}" >> .env
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-          echo "AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }}" >> .env
-          echo "AI_NEWS_CHANNELS_IDS=${{ secrets.AI_NEWS_CHANNELS_IDS }}" >> .env
-          echo "TECH_NEWS_CHANNELS_IDS=${{ secrets.TECH_NEWS_CHANNELS_IDS }}" >> .env
-          echo "SPACE_NEWS_CHANNELS_IDS=${{ secrets.SPACE_NEWS_CHANNELS_IDS }}" >> .env
-          echo "ECONOMY_NEWS_CHANNELS_IDS=${{ secrets.ECONOMY_NEWS_CHANNELS_IDS }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-
-      - name: Transfer .env file to VM
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          source: .env
-          target: /opt/motivium-bot/
-
-      - name: Transfer docker-compose.prod.yml to VM
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          source: docker-compose.prod.yml
-          target: /opt/motivium-bot/
-
       - name: Deploy to VM
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # Open the directory where the docker-compose file is located
-            cd /opt/motivium-bot
+            # Pull the latest image from Docker Hub
+            docker pull ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
 
-            # Stop and remove the container if already running
-            docker-compose -f docker-compose.prod.yml down || true
+            # Stop and remove any old containers
+            docker-compose down || true
 
-            # Pull the latest images
-            docker-compose -f docker-compose.prod.yml pull
+            # Start the containers using Docker Compose
+            docker-compose up -d
 
-            # Start the container using docker-compose
-            docker-compose -f docker-compose.prod.yml up -d
+            # Run migrations if necessary
+            docker-compose exec app pnpm run migrate:prod
