@@ -35,14 +35,21 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
           cache-to: type=inline
 
-      - name: Deploy to VM
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Transfer docker-compose.prod.yml to VM
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           source: docker-compose.prod.yml
           target: /opt/motivium-bot/
+
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USERNAME }}
+          key: ${{ secrets.VM_SSH_KEY }}
           script: |
             # Open the directory where the docker-compose file is located
             cd /opt/motivium-bot
