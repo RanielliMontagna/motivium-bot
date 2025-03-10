@@ -42,26 +42,11 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # Stop and remove the container
-            docker stop motivium-bot || true
-            docker rm motivium-bot || true
+            # Stop and remove the container if already running
+            docker-compose -f docker-compose.yml down || true
 
-            # Pull and run the new image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
-            docker run -d \
-              --name motivium-bot \
-              --restart unless-stopped \
-              -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
-              -e NODE_OPTIONS=${{ secrets.NODE_OPTIONS }} \
-              -e MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }} \
-              -e CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS=${{ secrets.CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS }} \
-              -e CURRENCY_BTC_CHANNEL_IDS=${{ secrets.CURRENCY_BTC_CHANNEL_IDS }} \
-              -e COIN_GECKO_API_KEY=${{ secrets.COIN_GECKO_API_KEY }} \
-              -e OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }} \
-              -e GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }} \
-              -e AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }} \
-              -e AI_NEWS_CHANNELS_IDS=${{ secrets.AI_NEWS_CHANNELS_IDS }} \
-              -e TECH_NEWS_CHANNELS_IDS=${{ secrets.TECH_NEWS_CHANNELS_IDS }} \
-              -e SPACE_NEWS_CHANNELS_IDS=${{ secrets.SPACE_NEWS_CHANNELS_IDS }} \
-              -e ECONOMY_NEWS_CHANNELS_IDS=${{ secrets.ECONOMY_NEWS_CHANNELS_IDS }} \
-              ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
+            # Pull the latest images
+            docker-compose -f docker-compose.yml pull
+
+            # Start the container using docker-compose
+            docker-compose -f docker-compose.yml up -d
