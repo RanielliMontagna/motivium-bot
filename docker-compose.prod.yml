@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   bot:
-    image: ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest # Use hosted image
+    image: ${DOCKER_USERNAME}/motivium-bot:latest
     container_name: motivium-bot
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
