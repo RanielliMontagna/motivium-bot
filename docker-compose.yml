@@ -17,4 +17,21 @@ services:
       - TECH_NEWS_CHANNELS_IDS=${TECH_NEWS_CHANNELS_IDS}
       - SPACE_NEWS_CHANNELS_IDS=${SPACE_NEWS_CHANNELS_IDS}
       - ECONOMY_NEWS_CHANNELS_IDS=${ECONOMY_NEWS_CHANNELS_IDS}
+      - DATABASE_URL=${DATABASE_URL}
     restart: unless-stopped
+    depends_on:
+      - db
+  db:
+    image: bitnami/postgresql:13
+    container_name: motivium-db
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/bitnami/postgresql
+    restart: unless-stopped
+volumes:
+  postgres_data:

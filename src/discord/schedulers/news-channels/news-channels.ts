@@ -60,8 +60,6 @@ function scheduleNewsChannels({
       return
     }
 
-    scheduleNewsMessage({ client, category, channelId, getNewsFunction })
-
     cron.schedule(
       '0 * * * *', // Send news every hour
       () => scheduleNewsMessage({ client, category, channelId, getNewsFunction }),
