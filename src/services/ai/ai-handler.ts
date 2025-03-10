@@ -1,11 +1,11 @@
 import { logger } from '#settings'
 
-import type { MessageData } from 'database/interfaces/MessageData.js'
+import { Message } from '@prisma/client'
 
 import { getGeminiResponse } from './gemini.js'
 import { getChatGPTResponse } from './openai.js'
 
-async function tryGetChatGPTResponse(message: string, history: MessageData[]) {
+async function tryGetChatGPTResponse(message: string, history: Message[]) {
   try {
     const response = await getChatGPTResponse(message, history)
     if (response) {
@@ -18,7 +18,7 @@ async function tryGetChatGPTResponse(message: string, history: MessageData[]) {
   }
 }
 
-async function tryGetGeminiResponse(message: string, history: MessageData[]) {
+async function tryGetGeminiResponse(message: string, history: Message[]) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       return { success: false, error: new Error('GEMINI_API_KEY not configured') } as const
@@ -34,7 +34,7 @@ async function tryGetGeminiResponse(message: string, history: MessageData[]) {
   }
 }
 
-export async function getAIResponse(message: string, history: MessageData[]) {
+export async function getAIResponse(message: string, history: Message[]) {
   const chatGPTResult = await tryGetChatGPTResponse(message, history)
 
   if (chatGPTResult.success) {

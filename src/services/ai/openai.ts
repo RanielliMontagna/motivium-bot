@@ -1,11 +1,11 @@
 import OpenAI from 'openai'
 import { SYSTEM_INSTRUCTIONS } from './system-instructions.js'
 
-import type { MessageData } from 'database/interfaces/MessageData.js'
+import { Message } from '@prisma/client'
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-export async function getChatGPTResponse(message: string, history: MessageData[]) {
+export async function getChatGPTResponse(message: string, history: Message[]) {
   const formattedHistory = history.map((msg) => ({
     role: 'user' as const,
     content: `${msg.user}: ${msg.content}`,

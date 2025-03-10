@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { SYSTEM_INSTRUCTIONS } from './system-instructions.js'
 
-import type { MessageData } from 'database/interfaces/MessageData.js'
+import { Message } from '@prisma/client'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
-export async function getGeminiResponse(message: string, history: MessageData[]) {
+export async function getGeminiResponse(message: string, history: Message[]) {
   const model = genAI.getGenerativeModel({
     model: 'gemini-2.0-flash',
     generationConfig: {
