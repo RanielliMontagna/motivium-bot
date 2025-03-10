@@ -1,11 +1,13 @@
 import { logger } from '#settings'
 
+import type { MessageData } from 'database/interfaces/MessageData.js'
+
 import { getGeminiResponse } from './gemini.js'
 import { getChatGPTResponse } from './openai.js'
 
-async function tryGetChatGPTResponse(message: string) {
+async function tryGetChatGPTResponse(message: string, history: MessageData[]) {
   try {
-    const response = await getChatGPTResponse(message)
+    const response = await getChatGPTResponse(message, history)
     if (response) {
       return { success: true, response } as const
     }
@@ -16,13 +18,13 @@ async function tryGetChatGPTResponse(message: string) {
   }
 }
 
-async function tryGetGeminiResponse(message: string) {
+async function tryGetGeminiResponse(message: string, history: MessageData[]) {
   try {
     if (!process.env.GEMINI_API_KEY) {
       return { success: false, error: new Error('GEMINI_API_KEY not configured') } as const
     }
 
-    const response = await getGeminiResponse(message)
+    const response = await getGeminiResponse(message, history)
     if (response) {
       return { success: true, response } as const
     }
@@ -32,19 +34,17 @@ async function tryGetGeminiResponse(message: string) {
   }
 }
 
-export async function getAIResponse(message: string) {
-  // Using ChatGPT as primary AI
-  const chatGPTResult = await tryGetChatGPTResponse(message)
+export async function getAIResponse(message: string, history: MessageData[]) {
+  const chatGPTResult = await tryGetChatGPTResponse(message, history)
 
   if (chatGPTResult.success) {
     return { success: true, response: chatGPTResult.response } as const
   }
 
   logger.error('Error getting ChatGPT response:', chatGPTResult.error)
-
   logger.warn('ChatGPT failed, trying Gemini API')
 
-  const geminiResult = await tryGetGeminiResponse(message)
+  const geminiResult = await tryGetGeminiResponse(message, history)
 
   if (geminiResult.success) {
     return { success: true, response: geminiResult.response } as const
