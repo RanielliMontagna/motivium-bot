@@ -42,7 +42,7 @@ jobs:
             cd /home/${{ secrets.VM_USERNAME }}/motivium-bot
 
             # Create environment file
-            echo "
+            cat <<EOF > .env
             DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
             BOT_TOKEN=${{ secrets.BOT_TOKEN }}
             NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}
@@ -61,7 +61,7 @@ jobs:
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_NAME=${{ secrets.DB_NAME }}
-            " > .env
+            EOF
 
             # Pull in the repository
             git pull
