@@ -31,36 +31,6 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
           cache-to: type=inline
 
-      - name: Generate .env file for production
-        run: |
-          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" > .env
-          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
-          echo "NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}" >> .env
-          echo "MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }}" >> .env
-          echo "CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS=${{ secrets.CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS }}" >> .env
-          echo "CURRENCY_BTC_CHANNEL_IDS=${{ secrets.CURRENCY_BTC_CHANNEL_IDS }}" >> .env
-          echo "COIN_GECKO_API_KEY=${{ secrets.COIN_GECKO_API_KEY }}" >> .env
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
-          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-          echo "AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }}" >> .env
-          echo "AI_NEWS_CHANNELS_IDS=${{ secrets.AI_NEWS_CHANNELS_IDS }}" >> .env
-          echo "TECH_NEWS_CHANNELS_IDS=${{ secrets.TECH_NEWS_CHANNELS_IDS }}" >> .env
-          echo "SPACE_NEWS_CHANNELS_IDS=${{ secrets.SPACE_NEWS_CHANNELS_IDS }}" >> .env
-          echo "ECONOMY_NEWS_CHANNELS_IDS=${{ secrets.ECONOMY_NEWS_CHANNELS_IDS }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-
-      - name: Transfer .env file to VM
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USERNAME }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          source: .env
-          target: /home/${{ secrets.VM_USERNAME }}/motivium-bot/.env
-
       - name: Deploy to VM
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -68,8 +38,32 @@ jobs:
           username: ${{ secrets.VM_USERNAME }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            # Pull in the repository
+            # Enter the directory
             cd /home/${{ secrets.VM_USERNAME }}/motivium-bot
+
+            # Create environment file
+            echo "
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            NODE_OPTIONS=${{ secrets.NODE_OPTIONS }}
+            MAIN_GUILD_ID=${{ secrets.MAIN_GUILD_ID }}
+            CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS=${{ secrets.CURRENCY_DOLLAR_EXCHANGE_CHANNEL_IDS }}
+            CURRENCY_BTC_CHANNEL_IDS=${{ secrets.CURRENCY_BTC_CHANNEL_IDS }}
+            COIN_GECKO_API_KEY=${{ secrets.COIN_GECKO_API_KEY }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+            AI_CHANNELS_IDS=${{ secrets.AI_CHANNELS_IDS }}
+            AI_NEWS_CHANNELS_IDS=${{ secrets.AI_NEWS_CHANNELS_IDS }}
+            TECH_NEWS_CHANNELS_IDS=${{ secrets.TECH_NEWS_CHANNELS_IDS }}
+            SPACE_NEWS_CHANNELS_IDS=${{ secrets.SPACE_NEWS_CHANNELS_IDS }}
+            ECONOMY_NEWS_CHANNELS_IDS=${{ secrets.ECONOMY_NEWS_CHANNELS_IDS }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            " > .env
+
+            # Pull in the repository
             git pull
 
             # Pull the latest image from Docker Hub
@@ -83,3 +77,6 @@ jobs:
 
             # Remove the .env file
             rm .env
+
+            # Remove all unused images and containers
+            sudo docker system prune --all -f
