@@ -17,7 +17,6 @@
 # Extensions
 *.zip
 *.sqlite
-*.sql
 *.exe
 *.db
 *.development.json
