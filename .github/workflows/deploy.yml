@@ -75,8 +75,5 @@ jobs:
             # Start the containers using Docker Compose
             docker-compose up -d --build
 
-            # Remove the .env file
-            rm .env
-
             # Remove all unused images and containers
             sudo docker system prune --all -f
