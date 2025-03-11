@@ -8,7 +8,7 @@ import { getAIResponse } from '#services'
 const { saveMessage, getRecentMessages } = repositories.messageRepository
 
 createEvent({
-  name: 'OpenAI message handler',
+  name: 'AI Chatbot',
   event: 'messageCreate',
   async run(message) {
     if (!isValidMessage(message)) return
@@ -45,9 +45,9 @@ createEvent({
 function isValidMessage(message: any) {
   if (message.author.bot) return false // Evita loops com bots
 
-  const openaiChannelsIds = process.env.AI_CHANNELS_IDS?.split(',')
+  const chatbotChannelsIds = process.env.AI_CHANNELS_IDS?.split(',')
 
-  if (!openaiChannelsIds?.length || !openaiChannelsIds.includes(message.channelId)) return false
+  if (!chatbotChannelsIds?.length || !chatbotChannelsIds.includes(message.channelId)) return false
 
   if (message.channel.type !== ChannelType.GuildText) {
     logger.warn(`Channel ${message.channelId} is not a text channel`)
