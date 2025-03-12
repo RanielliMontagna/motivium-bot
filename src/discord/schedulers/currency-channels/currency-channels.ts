@@ -12,6 +12,7 @@ import {
   getDollarExchangeRate,
   CoinGeckoCoin,
   getCoinData,
+  Coins,
 } from '#services'
 
 dayjs.extend(utc)
@@ -90,7 +91,7 @@ export async function scheduleBitcoinMessage(client: Client): Promise<void> {
     return
   }
 
-  const data = await getCoinData('bitcoin')
+  const data = await getCoinData(Coins.Bitcoin)
 
   console.log(data)
 
