@@ -1,11 +1,11 @@
 import { axiosInstance } from '#libs'
 import AxiosMockAdapter from 'axios-mock-adapter'
 
-import { COINGECKO_SIMPLE_PRICE_URL, getCoinData } from '../coinGeckoService.js'
+import { COINGECKO_SIMPLE_PRICE_URL, Coins, getCoinData } from '../coinGeckoService.js'
 
 const mock = new AxiosMockAdapter(axiosInstance)
 
-const coinId = 'bitcoin'
+const coinId = Coins.Bitcoin
 
 describe('coinGeckoService', () => {
   beforeEach(() => {
