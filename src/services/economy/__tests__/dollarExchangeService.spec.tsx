@@ -1,7 +1,8 @@
 import { axiosInstance } from '#libs'
 import AxiosMockAdapter from 'axios-mock-adapter'
 
-import { getDollarExchangeRate, AWESOME_API_DOLLAR_EXCHANGE_URL } from '../dollarExchangeService.js'
+import { getDollarExchangeRate } from '../dollarExchangeService.js'
+import { AWESOME_API_EXCHANGE_RATE_URL } from '../awesomeApiService.js'
 
 const mock = new AxiosMockAdapter(axiosInstance)
 
@@ -25,7 +26,7 @@ describe('dollarExchangeService', () => {
   })
 
   it('should fetch dollar exchange rate', async () => {
-    mock.onGet(AWESOME_API_DOLLAR_EXCHANGE_URL).reply(200, { USDBRL })
+    mock.onGet(`${AWESOME_API_EXCHANGE_RATE_URL}/USD-BRL`).reply(200, { USDBRL })
 
     const dollarExchangeRate = await getDollarExchangeRate()
 
@@ -33,13 +34,13 @@ describe('dollarExchangeService', () => {
   })
 
   it('should throw error on failed fetch', async () => {
-    mock.onGet(AWESOME_API_DOLLAR_EXCHANGE_URL).reply(404)
+    mock.onGet(`${AWESOME_API_EXCHANGE_RATE_URL}/USD-BRL`).reply(404)
 
     await expect(getDollarExchangeRate()).rejects.toThrow('Request failed with status code 404')
   })
 
   it('should throw error on missing dollar exchange rate', async () => {
-    mock.onGet(AWESOME_API_DOLLAR_EXCHANGE_URL).reply(200, {})
+    mock.onGet(`${AWESOME_API_EXCHANGE_RATE_URL}/USD-BRL`).reply(200, {})
 
     await expect(getDollarExchangeRate()).rejects.toThrow('Failed to fetch dollar exchange rate')
   })
