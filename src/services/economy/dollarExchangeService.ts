@@ -1,4 +1,5 @@
 import { axiosInstance } from '#libs'
+import { AWESOME_API_EXCHANGE_RATE_URL } from './awesomeApiService.js'
 
 export interface DollarExchangeRateResponse {
   code: string
@@ -14,12 +15,9 @@ export interface DollarExchangeRateResponse {
   create_date: string
 }
 
-export const AWESOME_API_URL = 'https://economia.awesomeapi.com.br'
-export const AWESOME_API_DOLLAR_EXCHANGE_URL = `${AWESOME_API_URL}/json/last/USD-BRL`
-
 export async function getDollarExchangeRate(): Promise<DollarExchangeRateResponse> {
   try {
-    const response = await axiosInstance.get(AWESOME_API_DOLLAR_EXCHANGE_URL)
+    const response = await axiosInstance.get(`${AWESOME_API_EXCHANGE_RATE_URL}/USD-BRL`)
 
     if (response.data.USDBRL) {
       return response.data.USDBRL
