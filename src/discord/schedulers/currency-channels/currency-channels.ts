@@ -93,8 +93,6 @@ export async function scheduleBitcoinMessage(client: Client): Promise<void> {
 
   const data = await getCoinData(Coins.Bitcoin)
 
-  console.log(data)
-
   await Promise.all(
     bitcoinChannelsIds.map(async (channelId) => {
       formatBitcoinMessage(data)

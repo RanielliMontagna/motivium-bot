@@ -29,10 +29,7 @@ async function setupCurrencyCommand() {
         const exchangeRate = await getExchangeRate(from, to)
         const code = `${from}${to}`
 
-        console.log('code', code)
         if (exchangeRate[code]) {
-          console.log('exchangeRate[code]', exchangeRate[code])
-
           const formattedBid = new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: exchangeRate[code].codein,
