@@ -20,6 +20,13 @@ A powerful Discord bot built with TypeScript and modern best practices, featurin
 ## 🌟 Features
 
 - ⚡ **Real-time Currency Updates**: Automated dollar exchange rate updates in configured channels
+- 🪙 **Bitcoin Price Updates**: Automated Bitcoin price updates in configured channels
+- 🏋️ **BMI Calculator**: Calculate your Body Mass Index with ease
+- 📰 **News Updates**: Get the latest news from various sources
+   - 🗞️ **Investing.com - Economy**: Stay updated with the latest economic news
+   - 🗞️ **The Verge - AI**:  Get the latest news on AI from The Verge
+   - 🗞️ **The Verge - Space**: Stay updated with the latest space news from The Verge
+   - 🗞️ **The Verge - Tech**: Stay updated with the latest tech news from The Verge
 - 🔄 **Scheduled Messages**: Configurable message scheduling system
 - 🛠️ **Modern Architecture**: Built with TypeScript and modern development practices
 - 🚀 **CI/CD Pipeline**: Automated testing and deployment
