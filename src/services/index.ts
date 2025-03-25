@@ -9,4 +9,4 @@ export * from './ai/gemini.js'
 export * from './ai/ai-handler.js'
 
 // News Services
-export * from './newsService.js'
+export * from './news/newsService.js'
