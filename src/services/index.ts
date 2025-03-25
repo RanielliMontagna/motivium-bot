@@ -10,3 +10,6 @@ export * from './ai/ai-handler.js'
 
 // News Services
 export * from './news/newsService.js'
+
+// CEP Services
+export * from './cep/viacep.js'
