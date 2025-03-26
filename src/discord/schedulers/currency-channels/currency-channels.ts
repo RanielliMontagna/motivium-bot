@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import cron from 'node-cron'
-import { Client, Colors, ColorsType } from 'discord.js'
+import { Client, Colors } from 'discord.js'
 
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
@@ -19,6 +19,8 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 type CurrencyType = 'dollar' | 'bitcoin' | 'ethereum' | 'solana'
+
+type ColorsType = (typeof Colors)[keyof typeof Colors]
 
 type CurrencyConfig = {
   coin: Coins | 'dollar'
