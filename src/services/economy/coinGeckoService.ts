@@ -12,6 +12,7 @@ export enum Coins {
   BinanceCoin = 'binancecoin',
   Cardano = 'cardano',
   Dogecoin = 'dogecoin',
+  Solana = 'solana',
 }
 
 export const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3'
