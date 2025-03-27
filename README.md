@@ -21,6 +21,9 @@ A powerful Discord bot built with TypeScript and modern best practices, featurin
 
 - ⚡ **Real-time Currency Updates**: Automated dollar exchange rate updates in configured channels
 - 🪙 **Bitcoin Price Updates**: Automated Bitcoin price updates in configured channels
+- 🔵 **Ethereum Price Updates**: Automated Ethereum price updates in configured channels
+- 🟣 **Solana Price Updates**: Automated Solana price updates in configured channels
+- 🏙️ **CEP Command**: Get information about a Brazil CEP code
 - 🏋️ **BMI Calculator**: Calculate your Body Mass Index with ease
 - 📰 **News Updates**: Get the latest news from various sources
    - 🗞️ **Investing.com - Economy**: Stay updated with the latest economic news
