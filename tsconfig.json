@@ -8,7 +8,7 @@
     "strict": true,
 
     // Language and environment options
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
