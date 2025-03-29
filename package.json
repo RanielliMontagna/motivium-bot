@@ -33,6 +33,7 @@
     "he": "1.2.0",
     "node-cache": "5.1.2",
     "node-cron": "^3.0.3",
+    "node-html-to-image": "5.0.0",
     "openai": "4.90.0",
     "puppeteer": "24.4.0",
     "rou3": "0.5.1",
