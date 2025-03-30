@@ -1,0 +1,106 @@
+<html>
+  <head>
+    <style>
+      * {
+        font-family: Arial, sans-serif;
+      }
+
+      body {
+        width: 800px;
+        background-color: #f5f5f5;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #007bff;
+        color: white;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      .position {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .team {
+        text-align: left;
+        padding-left: 10px;
+      }
+
+      .champion {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .relegation {
+        background-color: #dc3545;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{{title}}</h1>
+    <h3 style="text-align: center">{{subtitle}}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Time</th>
+          <th>PTS</th>
+          <th>J</th>
+          <th>V</th>
+          <th>E</th>
+          <th>D</th>
+          <th>GP</th>
+          <th>GC</th>
+          <th>SG</th>
+          <th>CA</th>
+          <th>CV</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each teams}}
+        <tr class="{{this.class}}">
+          <td class="position">{{this.position}}</td>
+          <td class="team">{{this.name}}</td>
+          <td>{{this.points}}</td>
+          <td>{{this.matches}}</td>
+          <td>{{this.wins}}</td>
+          <td>{{this.draws}}</td>
+          <td>{{this.losses}}</td>
+          <td>{{this.goalsFor}}</td>
+          <td>{{this.goalsAgainst}}</td>
+          <td>{{this.goalDifference}}</td>
+          <td>{{this.yellowCards}}</td>
+          <td>{{this.redCards}}</td>
+          <td>{{this.performance}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </body>
+</html>

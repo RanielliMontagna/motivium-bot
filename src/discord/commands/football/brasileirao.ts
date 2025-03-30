@@ -1,11 +1,16 @@
-import { ApplicationCommandOptionType, Colors, EmbedBuilder } from 'discord.js'
-import { BrasileiraoScraper, cbfSerieAUrl, globoEsporteSerieAUrl } from '#services'
-import { createCommand } from '#base'
-
+import fs from 'fs'
+import path from 'path'
 import dayjs from 'dayjs'
+import puppeteer from 'puppeteer'
+import nodeHtmlToImage from 'node-html-to-image'
+
+import { ApplicationCommandOptionType, Colors, EmbedBuilder } from 'discord.js'
+import { BrasileiraoScraper, globoEsporteSerieAUrl } from '#services'
+import { createCommand } from '#base'
 
 import isToday from 'dayjs/plugin/isToday.js'
 import isTomorrow from 'dayjs/plugin/isTomorrow.js'
+import { fileURLToPath } from 'url'
 
 dayjs.extend(isToday)
 dayjs.extend(isTomorrow)
@@ -43,6 +48,8 @@ createCommand({
   async run(interaction) {
     const scraper = new BrasileiraoScraper()
 
+    await interaction.deferReply()
+
     try {
       await scraper.initialize()
 
@@ -58,23 +65,59 @@ createCommand({
           return
         }
 
-        const embed = new EmbedBuilder()
-          .setTitle(`Tabela do Brasileirão ${season}`)
-          .setThumbnail('https://www.cbf.com.br/_next/image?url=%2Flogo%2Flogo-borda.png')
-          .setDescription('Aqui está a tabela atual do Brasileirão:')
-          .setColor(Colors.Gold)
-          .setTimestamp()
-          .setFooter({ text: 'Fonte: CBF' })
-          .setURL(cbfSerieAUrl)
+        const __filename = fileURLToPath(import.meta.url)
+        const __dirname = path.dirname(__filename)
+        const _tablefile = path.join(__dirname, 'table.html')
 
-        await interaction.reply({ embeds: [embed] })
+        console.log(table.teams)
+
+        const image = await nodeHtmlToImage({
+          html: fs.readFileSync(_tablefile, 'utf8'),
+          quality: 100,
+          type: 'png',
+          puppeteer,
+          content: {
+            title: `Tabela do Brasileirão - ${season}`,
+            subtitle: `Aqui você encontra a tabela do Campeonato Brasileiro de Futebol - Série A`,
+            teams: table.teams.map((team) => ({
+              position: team.position,
+              name: team.name,
+              badge: team.badge,
+              points: team.points || 0,
+              matches: team.matches || 0,
+              wins: team.wins || 0,
+              draws: team.draws || 0,
+              losses: team.losses || 0,
+              goalsFor: team.goalsFor || 0,
+              goalsAgainst: team.goalsAgainst,
+              goalDifference: team.goalDifference,
+              yellowCards: team.yellowCards,
+              redCards: team.redCards,
+              performance: team.performance.toFixed(2),
+            })),
+          },
+        })
+
+        if (!Buffer.isBuffer(image)) {
+          throw new Error('Failed to generate image as Buffer.')
+        }
+
+        await interaction.editReply({
+          content: `Tabela do Brasileirão - ${season}`,
+          files: [
+            {
+              attachment: image,
+              name: `brasileirao-${season}.png`,
+            },
+          ],
+        })
       }
 
       if (interaction.options.getSubcommand() === 'jogos') {
         const { games, round } = await scraper.getNextGames()
 
         if (games.length === 0) {
-          await interaction.reply('Não há jogos programados para o Brasileirão no momento.')
+          await interaction.editReply('Não há jogos programados para o Brasileirão no momento.')
           return
         }
 
@@ -108,11 +151,11 @@ createCommand({
           }
         })
 
-        await interaction.reply({ embeds: [embed] })
+        await interaction.editReply({ embeds: [embed] })
       }
     } catch (error) {
       console.error('Erro ao buscar dados do Brasileirão:', error)
-      await interaction.reply('Desculpe, ocorreu um erro ao buscar os dados do Brasileirão.')
+      await interaction.editReply('Desculpe, ocorreu um erro ao buscar os dados do Brasileirão.')
     } finally {
       await scraper.close()
     }
