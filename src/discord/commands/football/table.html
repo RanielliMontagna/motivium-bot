@@ -1,75 +1,134 @@
 <html>
   <head>
     <style>
+      :root {
+        --background-primary-color: #014dff;
+        --background-primary-dark-color: #20195f;
+        --background-secondary-color: #ffcd00;
+        --background-quaternary-color: #ffffff;
+        --text-primary-color: #ffffff;
+        --text-secondary-color: #000000;
+        --td-background-light-color: #f7f7f7;
+        --td-color-light-color: #646162;
+      }
+
       * {
-        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
 
       body {
         width: 800px;
-        background-color: #f5f5f5;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--background-quaternary-color);
+      }
+
+      /* Header */
+      header {
+        display: flex;
+      }
+      header > .logo {
+        background-color: var(--background-secondary-color);
+      }
+      header > .content {
+        background-color: var(--background-primary-color);
+        color: var(--text-primary-color);
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 12px;
       }
 
       h1 {
-        text-align: center;
-        color: #333;
+        margin: 0;
+        font-size: 24px;
       }
 
+      /* Table */
       table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
       }
 
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 10px;
+      thead > tr > th {
+        font-weight: lighter;
+        color: var(--background-primary-dark-color);
+      }
+
+      tbody > tr > td {
+        padding: 8px;
         text-align: center;
       }
 
-      th {
-        background-color: #007bff;
-        color: white;
+      tbody > tr:nth-child(odd) {
+        background-color: var(--td-background-light-color);
+        color: var(--td-color-light-color);
       }
 
-      tr:nth-child(even) {
-        background-color: #f2f2f2;
+      tbody > tr:nth-child(even) {
+        background-color: var(--background-quaternary-color);
+        color: var(--td-color-light-color);
       }
 
-      .position {
-        font-weight: bold;
-        color: #333;
-      }
-
-      .team {
+      thead > tr > th.classification {
         text-align: left;
-        padding-left: 10px;
+        padding-left: 8px;
+        width: 200px;
       }
 
-      .champion {
-        background-color: #28a745;
-        color: white;
+      tbody > tr > td.classification {
+        padding-left: 8px;
+        gap: 8px;
+        display: flex;
+        align-items: center;
       }
 
-      .relegation {
-        background-color: #dc3545;
-        color: white;
+      tbody > tr > td.classification span:first-child {
+        font-weight: bold;
+        width: 20px;
+      }
+
+      tbody > tr > td.classification span:nth-child(2) {
+        font-size: 8px;
+        font-weight: lighter;
+      }
+
+      tbody > tr > td.classification span:nth-child(3) {
+        font-size: 12px;
+      }
+
+      tbody > tr > td.points {
+        color: var(--background-primary-dark-color);
+        font-weight: bold;
+      }
+
+      .points {
+        -webkit-box-shadow: inset 25px 0px 15px -24px rgba(0, 0, 0, 0.2);
+        -moz-box-shadow: inset 25px 0px 15px -24px rgba(0, 0, 0, 0.2);
+        box-shadow: inset 25px 0px 15px -24px rgba(0, 0, 0, 0.2);
       }
     </style>
   </head>
   <body>
-    <h1>{{title}}</h1>
-    <h3 style="text-align: center">{{subtitle}}</h3>
+    <header>
+      <!-- <div class="logo">
+        <img
+          src="{{logoSrc}}"
+          alt="Logo CBF"
+          style="width: 100px; height: auto; display: block; margin: 0 auto"
+        />
+      </div> -->
+      <div class="content">
+        <h1>{{title}}</h1>
+      </div>
+    </header>
     <table>
       <thead>
         <tr>
-          <th>#</th>
-          <th>Time</th>
-          <th>PTS</th>
+          <th class="classification">Classificação</th>
+          <th class="points">PTS</th>
           <th>J</th>
           <th>V</th>
           <th>E</th>
@@ -85,9 +144,12 @@
       <tbody>
         {{#each teams}}
         <tr class="{{this.class}}">
-          <td class="position">{{this.position}}</td>
-          <td class="team">{{this.name}}</td>
-          <td>{{this.points}}</td>
+          <td class="classification">
+            <span>{{this.position}}</span>
+            <span>{{this.positionChange}}</span>
+            <span>{{this.name}}</span>
+          </td>
+          <td class="points">{{this.points}}</td>
           <td>{{this.matches}}</td>
           <td>{{this.wins}}</td>
           <td>{{this.draws}}</td>

@@ -69,18 +69,16 @@ createCommand({
         const __dirname = path.dirname(__filename)
         const _tablefile = path.join(__dirname, 'table.html')
 
-        console.log(table.teams)
-
         const image = await nodeHtmlToImage({
           html: fs.readFileSync(_tablefile, 'utf8'),
           quality: 100,
           type: 'png',
           puppeteer,
           content: {
-            title: `Tabela do Brasileirão - ${season}`,
-            subtitle: `Aqui você encontra a tabela do Campeonato Brasileiro de Futebol - Série A`,
+            title: `Campeonato Brasileiro - Série A - ${season}`,
             teams: table.teams.map((team) => ({
               position: team.position,
+              positionChange: team.positionChange,
               name: team.name,
               badge: team.badge,
               points: team.points || 0,
@@ -93,8 +91,9 @@ createCommand({
               goalDifference: team.goalDifference,
               yellowCards: team.yellowCards,
               redCards: team.redCards,
-              performance: team.performance.toFixed(2),
+              performance: team.performance,
             })),
+            logoSrc: 'public/assets/football/cbf.svg',
           },
         })
 
