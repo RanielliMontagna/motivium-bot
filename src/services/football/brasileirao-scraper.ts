@@ -102,6 +102,7 @@ export class BrasileiraoScraper {
         const awayTeam = game.querySelector(
           'div.placar__equipes--visitante span.equipes__nome',
         )?.textContent
+
         const homeScore = game.querySelector('.placar-box__valor--mandante')?.textContent
         const awayScore = game.querySelector('.placar-box__valor--visitante')?.textContent
         const local = game.querySelector('span.jogo__informacoes--local')?.textContent

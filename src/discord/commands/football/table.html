@@ -10,6 +10,9 @@
         --text-secondary-color: #000000;
         --td-background-light-color: #f7f7f7;
         --td-color-light-color: #646162;
+
+        --relegation-color: #ea4335;
+        --champion-color: #34a853;
       }
 
       * {
@@ -34,22 +37,33 @@
         background-color: var(--background-primary-color);
         color: var(--text-primary-color);
         flex: 1;
+        padding: 12px;
+        gap: 4px;
+        border-radius: 0 0 1rem 1rem;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 12px;
       }
-
-      h1 {
+      header h1 {
         margin: 0;
-        font-size: 24px;
+        font-size: 1.25rem;
+      }
+      header p {
+        margin: 0;
+        font-size: 0.75rem;
+        font-weight: lighter;
       }
 
       /* Table */
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
+        margin-top: 8px;
+      }
+
+      thead > tr > th {
+        padding: 8px;
       }
 
       thead > tr > th {
@@ -79,7 +93,6 @@
       }
 
       tbody > tr > td.classification {
-        padding-left: 8px;
         gap: 8px;
         display: flex;
         align-items: center;
@@ -109,6 +122,21 @@
         -moz-box-shadow: inset 25px 0px 15px -24px rgba(0, 0, 0, 0.2);
         box-shadow: inset 25px 0px 15px -24px rgba(0, 0, 0, 0.2);
       }
+
+      div.indicator {
+        min-width: 2px;
+        height: 30px;
+        background-color: transparent;
+        border-radius: 0 5px 5px 0;
+      }
+
+      div.indicator.champion {
+        background-color: var(--champion-color);
+      }
+
+      div.indicator.relegation {
+        background-color: var(--relegation-color);
+      }
     </style>
   </head>
   <body>
@@ -122,6 +150,7 @@
       </div> -->
       <div class="content">
         <h1>{{title}}</h1>
+        <p>{{subtitle}}</p>
       </div>
     </header>
     <table>
@@ -145,6 +174,9 @@
         {{#each teams}}
         <tr class="{{this.class}}">
           <td class="classification">
+            <div
+              class="indicator {{#if (eq this.position 1)}}champion{{else if (gte this.position 17)}}relegation{{/if}}"
+            ></div>
             <span>{{this.position}}</span>
             <span>{{this.positionChange}}</span>
             <span>{{this.name}}</span>

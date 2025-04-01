@@ -12,6 +12,13 @@ import isToday from 'dayjs/plugin/isToday.js'
 import isTomorrow from 'dayjs/plugin/isTomorrow.js'
 import { fileURLToPath } from 'url'
 
+import Handlebars from 'handlebars'
+
+// Register Handlebars helpers for comparison in html template
+Handlebars.registerHelper('eq', (a, b) => a === b)
+Handlebars.registerHelper('gte', (a, b) => a >= b)
+
+// Extend dayjs with isToday and isTomorrow plugins
 dayjs.extend(isToday)
 dayjs.extend(isTomorrow)
 
@@ -75,7 +82,8 @@ createCommand({
           type: 'png',
           puppeteer,
           content: {
-            title: `Campeonato Brasileiro - Série A - ${season}`,
+            title: `Campeonato Brasileiro Série A - ${season}`,
+            subtitle: 'Fonte: CBF',
             teams: table.teams.map((team) => ({
               position: team.position,
               positionChange: team.positionChange,
@@ -102,13 +110,7 @@ createCommand({
         }
 
         await interaction.editReply({
-          content: `Tabela do Brasileirão - ${season}`,
-          files: [
-            {
-              attachment: image,
-              name: `brasileirao-${season}.png`,
-            },
-          ],
+          files: [{ attachment: image, name: `brasileirao-${season}.png` }],
         })
       }
 
