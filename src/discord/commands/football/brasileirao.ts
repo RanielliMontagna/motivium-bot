@@ -138,11 +138,19 @@ createCommand({
           const isTomorrow = dayjs(game.date).isTomorrow()
           const dateLabel = `${day} • ${isToday ? 'Hoje' : isTomorrow ? 'Amanhã' : dayOfWeek} • ${time}`
 
-          embed.addFields({
-            name: `**${game.homeTeam}** vs **${game.awayTeam}**`,
-            value: `${dateLabel}`,
-            inline: true,
-          })
+          if (game.status === 'saiba como foi') {
+            embed.addFields({
+              name: `**${game.homeTeam}** ${game.homeScore} x ${game.awayScore} **${game.awayTeam}**`,
+              value: `${dateLabel}`,
+              inline: true,
+            })
+          } else {
+            embed.addFields({
+              name: `**${game.homeTeam}** vs **${game.awayTeam}**`,
+              value: `${dateLabel}`,
+              inline: true,
+            })
+          }
 
           // two columns of games
           if (index % 2 === 1) {

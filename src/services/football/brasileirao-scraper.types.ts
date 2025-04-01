@@ -28,4 +28,5 @@ export interface Game {
   homeScore?: number
   awayScore?: number
   local: string
+  status: string
 }

@@ -102,12 +102,8 @@ export class BrasileiraoScraper {
         const awayTeam = game.querySelector(
           'div.placar__equipes--visitante span.equipes__nome',
         )?.textContent
-        const homeScore = game.querySelector(
-          'div.placar__span.placar-box__valor--visitante',
-        )?.textContent
-        const awayScore = game.querySelector(
-          'div.placar__span.placar-box__valor--mandante',
-        )?.textContent
+        const homeScore = game.querySelector('.placar-box__valor--mandante')?.textContent
+        const awayScore = game.querySelector('.placar-box__valor--visitante')?.textContent
         const local = game.querySelector('span.jogo__informacoes--local')?.textContent
 
         return {
@@ -117,6 +113,7 @@ export class BrasileiraoScraper {
           awayTeam: awayTeam || '',
           homeTeam: homeTeam || '',
           local: local || '',
+          status: game.querySelector('span.jogo__transmissao--broadcast ')?.textContent || '',
         }
       })
 
