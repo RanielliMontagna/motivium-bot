@@ -5,6 +5,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string({ description: 'Database URL is required' }).min(1),
   MAIN_GUILD_ID: z.string().optional(),
   WEBHOOK_LOGS_URL: z.string().url().optional(),
+  PUPPETEER_EXECUTABLE_PATH: z.string().optional(),
 
   // Currency envs
   COIN_GECKO_API_KEY: z.string().optional(),
@@ -22,7 +23,6 @@ const envSchema = z.object({
   TECH_NEWS_CHANNELS_IDS: z.string().optional(),
   SPACE_NEWS_CHANNELS_IDS: z.string().optional(),
   ECONOMY_NEWS_CHANNELS_IDS: z.string().optional(),
-  // Env vars...
 })
 
 type EnvSchema = z.infer<typeof envSchema>

@@ -13,6 +13,7 @@ export class BrasileiraoScraper {
 
   async initialize() {
     this.browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       headless: 'shell',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
