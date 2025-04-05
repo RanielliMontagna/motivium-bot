@@ -17,12 +17,25 @@ COPY . .
 
 RUN pnpm run build
 
+
 # ===============================
 # Stage 2: Production
 # ===============================
 FROM node:23.9-alpine AS runner
 
 WORKDIR /usr/src/app
+
+# Dependências para rodar o Chrome Headless
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Puppeteer espera esse path por padrão no Alpine
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Enable Corepack and prepare pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
