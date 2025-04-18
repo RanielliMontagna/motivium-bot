@@ -20,6 +20,7 @@ services:
       - SPACE_NEWS_CHANNELS_IDS=${SPACE_NEWS_CHANNELS_IDS}
       - ECONOMY_NEWS_CHANNELS_IDS=${ECONOMY_NEWS_CHANNELS_IDS}
       - DATABASE_URL=${DATABASE_URL}
+      - WEATHER_API_KEY=${WEATHER_API_KEY}
     restart: unless-stopped
     depends_on:
       - db
