@@ -16,3 +16,7 @@ export * from './cep/viacep.js'
 
 // Football Services
 export * from './football/brasileirao-scraper.js'
+
+// Weather service
+export * from './weather/weatherService.js'
+export * from './weather/weatherService.types.js'

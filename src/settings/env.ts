@@ -23,6 +23,9 @@ const envSchema = z.object({
   TECH_NEWS_CHANNELS_IDS: z.string().optional(),
   SPACE_NEWS_CHANNELS_IDS: z.string().optional(),
   ECONOMY_NEWS_CHANNELS_IDS: z.string().optional(),
+
+  // Weather
+  WEATHER_API_KEY: z.string().optional(),
 })
 
 type EnvSchema = z.infer<typeof envSchema>
