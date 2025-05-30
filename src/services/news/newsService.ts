@@ -49,6 +49,9 @@ async function getRSSNews(feed: RSSFeed): Promise<NewsArticle[]> {
 const theVergeURLBase = 'https://www.theverge.com/rss'
 const investingURLBase = 'https://br.investing.com/rss'
 const gazetaDoPovoUrlBase = 'https://www.gazetadopovo.com.br/feed/rss'
+const conexaoPoliticaUrlBase = 'https://conexaopolitica.com.br/feed'
+const embrapaAgroUrlBase =
+  'https://www.embrapa.br/en/noticias-rss/-/asset_publisher/HA73uEmvroGS/rss'
 
 async function getTechNews(): Promise<NewsArticle[]> {
   const techFeeds = [{ url: `${theVergeURLBase}/tech/index.xml`, name: 'The Verge - Tech' }]
@@ -78,7 +81,7 @@ async function getEconomyNews(): Promise<NewsArticle[]> {
     { url: `${investingURLBase}/news_301.rss`, name: 'Investing.com - Cryptocurrency' },
     { url: `${investingURLBase}/news_14.rss`, name: 'Investing.com - Economy' },
     { url: `${investingURLBase}/news_1.rss`, name: 'Investing.com - Currency Exchange' },
-    { url: `${gazetaDoPovoUrlBase}/economia.rss`, name: 'Gazeta do Povo - Economia' },
+    { url: `${gazetaDoPovoUrlBase}/economia.xml`, name: 'Gazeta do Povo - Economia' },
   ]
   const economyNews = await Promise.all(economyFeeds.map((feed) => getRSSNews(feed)))
 
@@ -87,6 +90,7 @@ async function getEconomyNews(): Promise<NewsArticle[]> {
 
 async function getBrazilNews(): Promise<NewsArticle[]> {
   const articles = [
+    { url: `${conexaoPoliticaUrlBase}`, name: 'Conexão Política - Política' },
     { url: `${gazetaDoPovoUrlBase}/republica.xml`, name: 'Gazeta do Povo - República' },
     { url: `${gazetaDoPovoUrlBase}/opiniao.xml`, name: 'Gazeta do Povo - Opinião' },
   ]
@@ -95,4 +99,19 @@ async function getBrazilNews(): Promise<NewsArticle[]> {
   return brazilNews.flat()
 }
 
-export { getRSSNews, getTechNews, getAINews, getSpaceNews, getEconomyNews, getBrazilNews }
+async function getAgroNews(): Promise<NewsArticle[]> {
+  const agroFeeds = [{ url: `${embrapaAgroUrlBase}`, name: 'Embrapa - Agro' }]
+  const agroNews = await Promise.all(agroFeeds.map((feed) => getRSSNews(feed)))
+
+  return agroNews.flat()
+}
+
+export {
+  getRSSNews,
+  getTechNews,
+  getAINews,
+  getSpaceNews,
+  getEconomyNews,
+  getBrazilNews,
+  getAgroNews,
+}

@@ -5,7 +5,14 @@ import { Client } from 'discord.js'
 
 import { logger } from '#settings'
 import { sendMessage } from '#utils'
-import { getAINews, getEconomyNews, getSpaceNews, getTechNews } from '#services'
+import {
+  getAINews,
+  getEconomyNews,
+  getSpaceNews,
+  getTechNews,
+  getBrazilNews,
+  getAgroNews,
+} from '#services'
 
 import { NewsCategory, ScheduleNewsChannels, ScheduleNewsMessage } from './news-channels.types.js'
 
@@ -13,6 +20,7 @@ import { NewsCategory, ScheduleNewsChannels, ScheduleNewsMessage } from './news-
 const newsCaches = {
   AI: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
   Tech: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
+  Agro: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
   Space: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
   Economy: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
   Brazil: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
@@ -25,10 +33,11 @@ const newsCaches = {
 export async function initializeNewsChannelsScheduler(client: Client) {
   const categories = [
     { env: 'AI_NEWS_CHANNELS_IDS', fetchNews: getAINews, name: NewsCategory.AI },
+    { env: 'AGRO_NEWS_CHANNELS_IDS', fetchNews: getAgroNews, name: NewsCategory.Agro },
     { env: 'TECH_NEWS_CHANNELS_IDS', fetchNews: getTechNews, name: NewsCategory.Tech },
     { env: 'SPACE_NEWS_CHANNELS_IDS', fetchNews: getSpaceNews, name: NewsCategory.Space },
-    { env: 'ECONOMY_NEWS_CHANNELS_IDS', fetchNews: getEconomyNews, name: NewsCategory.Economy },
     { env: 'BRAZIL_NEWS_CHANNELS_IDS', fetchNews: getBrazilNews, name: NewsCategory.Brazil },
+    { env: 'ECONOMY_NEWS_CHANNELS_IDS', fetchNews: getEconomyNews, name: NewsCategory.Economy },
   ]
 
   categories.forEach(({ env, fetchNews, name }) => {
