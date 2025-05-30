@@ -63,7 +63,7 @@ function scheduleNewsChannels({
     }
 
     cron.schedule(
-      '0 * * * *', // Send news every hour
+      '0,30 * * * *', // Send news every 30 minutes
       () => scheduleNewsMessage({ client, category, channelId, getNewsFunction }),
       { timezone: 'America/Sao_Paulo' },
     )
