@@ -56,6 +56,7 @@ jobs:
             AI_NEWS_CHANNELS_IDS=${{ secrets.AI_NEWS_CHANNELS_IDS }}
             TECH_NEWS_CHANNELS_IDS=${{ secrets.TECH_NEWS_CHANNELS_IDS }}
             SPACE_NEWS_CHANNELS_IDS=${{ secrets.SPACE_NEWS_CHANNELS_IDS }}
+            BRAZIL_NEWS_CHANNELS_IDS=${{ secrets.BRAZIL_NEWS_CHANNELS_IDS }}
             ECONOMY_NEWS_CHANNELS_IDS=${{ secrets.ECONOMY_NEWS_CHANNELS_IDS }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
             DB_USER=${{ secrets.DB_USER }}

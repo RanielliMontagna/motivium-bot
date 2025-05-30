@@ -7,6 +7,8 @@ export enum NewsCategory {
   Tech = 'Tech',
   Space = 'Space',
   Economy = 'Economy',
+  Brazil = 'Brazil',
+  Agro = 'Agro',
 }
 
 interface ScheduleParams {
