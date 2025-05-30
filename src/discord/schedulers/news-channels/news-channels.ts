@@ -15,6 +15,7 @@ const newsCaches = {
   Tech: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
   Space: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
   Economy: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
+  Brazil: new NodeCache({ stdTTL: 86400, checkperiod: 3600 }),
 }
 
 /**
@@ -27,6 +28,7 @@ export async function initializeNewsChannelsScheduler(client: Client) {
     { env: 'TECH_NEWS_CHANNELS_IDS', fetchNews: getTechNews, name: NewsCategory.Tech },
     { env: 'SPACE_NEWS_CHANNELS_IDS', fetchNews: getSpaceNews, name: NewsCategory.Space },
     { env: 'ECONOMY_NEWS_CHANNELS_IDS', fetchNews: getEconomyNews, name: NewsCategory.Economy },
+    { env: 'BRAZIL_NEWS_CHANNELS_IDS', fetchNews: getBrazilNews, name: NewsCategory.Brazil },
   ]
 
   categories.forEach(({ env, fetchNews, name }) => {
