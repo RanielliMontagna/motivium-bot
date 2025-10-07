@@ -13,7 +13,11 @@ import { baseResponderHandler } from './base.responder.js'
 import ck from 'chalk'
 import glob from 'fast-glob'
 
-import { initializeCurrencyChannelsScheduler, initializeNewsChannelsScheduler } from '#schedulers'
+import {
+  initializeCurrencyChannelsScheduler,
+  initializeNewsChannelsScheduler,
+  initializePromotionsScheduler,
+} from '#schedulers'
 
 export const BASE_VERSION = '1.0.6' as const // DO NOT CHANGE THIS VAR
 
@@ -91,6 +95,17 @@ function createClient(token: string, options: BootstrapOptions) {
     await baseRegisterCommands(client)
     initializeCurrencyChannelsScheduler(client)
     initializeNewsChannelsScheduler(client)
+
+    const promotionsChannelIds = process.env.PROMOTIONS_CHANNELS_IDS?.split(',') || []
+    const telegramChannels = process.env.TELEGRAM_PROMOTIONS_CHANNELS?.split(',') || []
+
+    if (promotionsChannelIds.length && telegramChannels.length) {
+      initializePromotionsScheduler({
+        client,
+        channelIds: promotionsChannelIds,
+        telegramChannels,
+      })
+    }
 
     process.on('uncaughtException', (err) => baseErrorHandler(err, client))
     process.on('unhandledRejection', (err) => baseErrorHandler(err, client))
