@@ -20,10 +20,25 @@ const promotionsCache = new NodeCache({
   checkperiod: PROMOTIONS_CONFIG.CACHE_CHECK_PERIOD,
 })
 
-// Queue para armazenar promoções pendentes para envio
 const promotionsQueue = new Map<string, TelegramMessage[]>()
 let lastFetchTime = 0
-const FETCH_INTERVAL_MS = 5 * 60 * 1000
+const FETCH_INTERVAL_MS = 5 * 60 * 1000 // 5 minutos
+
+// Singleton TelegramService for reuse and auto-disconnect
+let globalTelegramService: TelegramService | null = null
+
+function getTelegramService(): TelegramService {
+  if (!globalTelegramService) {
+    globalTelegramService = new TelegramService({
+      apiId: Number(process.env.TELEGRAM_API_ID),
+      apiHash: String(process.env.TELEGRAM_API_HASH),
+      phoneNumber: process.env.TELEGRAM_PHONE_NUMBER,
+      password: process.env.TELEGRAM_PASSWORD,
+      sessionString: process.env.TELEGRAM_SESSION_STRING,
+    })
+  }
+  return globalTelegramService
+}
 
 /**
  * Initializes the scheduler for promotions channels.
@@ -46,14 +61,20 @@ export async function initializePromotionsScheduler(
 
   cron.schedule(
     PROMOTIONS_CONFIG.SCHEDULE,
-    () => {
-      channelIds.forEach((channelId) => {
-        schedulePromotionMessage({
-          client,
-          channelId,
-          telegramChannels,
-        })
-      })
+    async () => {
+      for (const channelId of channelIds) {
+        try {
+          await schedulePromotionMessage({
+            client,
+            channelId,
+            telegramChannels,
+          })
+
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+        } catch (error) {
+          logger.error(`Error processing channel ${channelId}:`, error)
+        }
+      }
     },
     { timezone: 'America/Sao_Paulo' },
   )
@@ -62,18 +83,10 @@ export async function initializePromotionsScheduler(
 }
 
 async function fetchNewPromotions(telegramChannels: string[], queueKey: string): Promise<void> {
-  let telegramService: TelegramService | null = null
-
   try {
     logger.log('🔍 Fetching new promotions from Telegram...')
 
-    telegramService = new TelegramService({
-      apiId: Number(process.env.TELEGRAM_API_ID),
-      apiHash: process.env.TELEGRAM_API_HASH!,
-      phoneNumber: process.env.TELEGRAM_PHONE_NUMBER,
-      password: process.env.TELEGRAM_PASSWORD,
-      sessionString: process.env.TELEGRAM_SESSION_STRING,
-    })
+    const telegramService = getTelegramService()
 
     await telegramService.initialize()
 
@@ -120,14 +133,6 @@ async function fetchNewPromotions(telegramChannels: string[], queueKey: string):
     logger.success(`Added ${newPromotions.length} new promotions to queue`)
   } catch (error) {
     logger.error('Error fetching new promotions:', error)
-  } finally {
-    if (telegramService) {
-      try {
-        await telegramService.disconnect()
-      } catch (disconnectError) {
-        logger.warn('Error disconnecting Telegram service:', disconnectError)
-      }
-    }
   }
 }
 

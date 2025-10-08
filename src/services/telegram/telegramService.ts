@@ -8,7 +8,7 @@ import type {
   PromotionSearchOptions,
 } from './telegramService.types.js'
 
-// Global state para gerenciar códigos SMS
+// Global state to manage Telegram authentication
 class TelegramAuthManager {
   private static instance: TelegramAuthManager
   private pendingCode: string | null = null
@@ -38,7 +38,7 @@ class TelegramAuthManager {
 
     return new Promise((resolve) => {
       this.codeResolver = resolve
-      logger.warn('📨 SMS code required! Use: /telegramcode <codigo>')
+      logger.warn('📨 Telegram code required! Use: /telegramcode <code>')
     })
   }
 
@@ -77,6 +77,7 @@ export class TelegramService {
   private config: TelegramServiceConfig
   private isInitialized: boolean = false
   private authManager = TelegramAuthManager.getInstance()
+  private connectionTimeout: NodeJS.Timeout | null = null
 
   private readonly DEFAULT_KEYWORDS = [
     'promoção',
@@ -95,14 +96,12 @@ export class TelegramService {
     this.validateConfig(config)
     this.config = config
 
-    // Cria session string vazia se não fornecida ou inválida
     let sessionString = ''
     if (
       config.sessionString &&
       config.sessionString.trim() !== '' &&
       config.sessionString !== 'sessao_string_opcional'
     ) {
-      // Verifica se a session string parece válida (base64-like string)
       if (config.sessionString.length > 20 && /^[A-Za-z0-9+/=]+$/.test(config.sessionString)) {
         sessionString = config.sessionString
       } else {
@@ -112,17 +111,20 @@ export class TelegramService {
 
     this.session = new StringSession(sessionString)
     this.client = new TelegramClient(this.session, config.apiId, config.apiHash, {
-      connectionRetries: 5,
+      connectionRetries: 3,
+      requestRetries: 2,
+      timeout: 10000, // 10 seconds
+      useWSS: false,
+      floodSleepThreshold: 60,
     })
   }
 
-  // Método estático para enviar código SMS
   static submitSMSCode(code: string): boolean {
     try {
       TelegramAuthManager.getInstance().setCode(code)
       return true
     } catch (error) {
-      logger.error('Error submitting SMS code:', error)
+      logger.error('Error submitting Telegram code:', error)
       return false
     }
   }
@@ -157,7 +159,6 @@ export class TelegramService {
         phoneNumber: async () => this.config.phoneNumber || '',
         password: async () => this.config.password || '',
         phoneCode: async () => {
-          // Usa o auth manager para aguardar o código
           return await this.authManager.waitForCode()
         },
         onError: (err: any) => {
@@ -166,7 +167,6 @@ export class TelegramService {
         },
       })
 
-      // Salva a session string se foi criada uma nova
       const newSessionString = this.session.save()
       if (newSessionString && newSessionString !== this.config.sessionString) {
         logger.success(
@@ -196,6 +196,8 @@ export class TelegramService {
       if (!this.isInitialized) {
         await this.initialize()
       }
+
+      this.scheduleAutoDisconnect()
 
       const messages = await this.client.getMessages(channelUsername, {
         limit: Math.min(limit, 100), // Limit to prevent excessive requests
@@ -232,12 +234,29 @@ export class TelegramService {
     }
   }
 
+  private scheduleAutoDisconnect(): void {
+    if (this.connectionTimeout) {
+      clearTimeout(this.connectionTimeout)
+    }
+
+    this.connectionTimeout = setTimeout(async () => {
+      try {
+        await this.disconnect()
+        logger.log('Auto-disconnected from Telegram due to inactivity')
+      } catch (error) {
+        logger.warn('Error during auto-disconnect:', error)
+      }
+    }, 120000) // 2 minutes
+  }
+
   async searchPromotions(options: PromotionSearchOptions): Promise<TelegramMessage[]> {
     const { channels, keywords = this.DEFAULT_KEYWORDS, limit = 20 } = options
 
     if (!this.isInitialized) {
       await this.initialize()
     }
+
+    this.scheduleAutoDisconnect()
 
     const allPromotions: TelegramMessage[] = []
 
@@ -282,12 +301,32 @@ export class TelegramService {
 
   async disconnect(): Promise<void> {
     try {
-      if (this.client.connected) {
-        await this.client.disconnect()
+      if (this.client && this.client.connected) {
+        // Stop the update loop before disconnecting
+        if (this.client._updateLoop) {
+          this.client._updateLoop = false
+        }
+
+        await Promise.race([
+          this.client.disconnect(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Disconnect timeout')), 5000),
+          ),
+        ])
+
         logger.log('Telegram client disconnected')
       }
     } catch (error) {
-      logger.error('Error disconnecting Telegram client:', error)
+      logger.warn('Error disconnecting Telegram client (forced):', error)
+    } finally {
+      // Clear the auto-disconnect timeout
+      if (this.connectionTimeout) {
+        clearTimeout(this.connectionTimeout)
+        this.connectionTimeout = null
+      }
+
+      this.client = null
+      this.isInitialized = false
     }
   }
 }

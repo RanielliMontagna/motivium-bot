@@ -45,7 +45,7 @@ createCommand({
 
       const initPromise = telegramService.initialize()
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout waiting for SMS code')), 5000)
+        setTimeout(() => reject(new Error('Timeout waiting for Telegram code')), 5000)
       })
 
       await Promise.race([initPromise, timeoutPromise])
@@ -107,17 +107,17 @@ createCommand({
 
       if (
         error instanceof TelegramAuthError ||
-        (error instanceof Error && error.message.includes('Timeout waiting for SMS'))
+        (error instanceof Error && error.message.includes('Timeout waiting for Telegram code'))
       ) {
         embed = new EmbedBuilder()
           .setColor(Colors.Orange)
           .setTitle('📱 Autenticação Necessária')
-          .setDescription('É necessário inserir o código SMS do Telegram.')
+          .setDescription('É necessário inserir o código Telegram.')
           .addFields(
             {
-              name: '📨 Código SMS Solicitado',
+              name: '📨 Código Telegram Solicitado',
               value:
-                '1. Verifique seu celular - você deve ter recebido um código SMS\n2. Use o comando `/telegramcode <codigo>`\n3. Execute `/promocoes` novamente após inserir o código',
+                '1. Verifique seu celular - você deve ter recebido um código no Telegram\n2. Use o comando `/telegramcode <codigo>`\n3. Execute `/promocoes` novamente após inserir o código',
               inline: false,
             },
             {
@@ -126,7 +126,7 @@ createCommand({
               inline: false,
             },
           )
-          .setFooter({ text: 'O código SMS expira em alguns minutos' })
+          .setFooter({ text: 'O código Telegram expira em alguns minutos' })
       } else if (error instanceof TelegramError) {
         embed = new EmbedBuilder()
           .setColor(Colors.Red)
