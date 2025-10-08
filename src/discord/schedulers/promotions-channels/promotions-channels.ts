@@ -88,6 +88,13 @@ async function fetchNewPromotions(telegramChannels: string[], queueKey: string):
         'sale',
         'black friday',
         'cyber monday',
+        'frete grátis',
+        'liquidação',
+        'promo',
+        'descontos',
+        'cashback',
+        'mercado livre',
+        'magalu',
       ],
       limit: 30,
     })
@@ -163,9 +170,8 @@ async function schedulePromotionMessage({
       formattedDate: dayjs(promotion.date * 1000).format('DD/MM/YYYY [às] HH:mm'),
     }
 
-    const cleanMessage = promotion.message
-      .replace(/https?:\/\/[^\s]+/g, '[Link]') // Replace URLs with [Link]
-      .substring(0, PROMOTIONS_CONFIG.MAX_MESSAGE_LENGTH) // Limit message length
+    console.log(JSON.stringify(promotionData, null, 2))
+    const cleanMessage = promotion.message.substring(0, PROMOTIONS_CONFIG.MAX_MESSAGE_LENGTH) // Limit message length only
 
     const sourceFormatted = `-# 📢 Canal: ${promotion.channel.replace('@', '')}`
     const message = `${cleanMessage}\n\n${sourceFormatted} • ${promotionData.formattedDate}`

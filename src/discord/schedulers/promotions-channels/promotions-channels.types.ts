@@ -18,10 +18,10 @@ export interface PromotionData extends TelegramMessage {
 }
 
 export const PROMOTIONS_CONFIG = {
-  SCHEDULE: '0 */2 * * *', // Every 2 hours
+  SCHEDULE: '* * * * *', // Every minute
   CACHE_TTL: 86400, // 24 hours in seconds
   CACHE_CHECK_PERIOD: 3600, // 1 hour in seconds
-  MAX_PROMOTIONS_PER_EXECUTION: 5,
-  MESSAGE_DELAY_MS: 2000,
+  MAX_PROMOTIONS_PER_EXECUTION: 1, // 1 promotion per minute
+  MESSAGE_DELAY_MS: 1000, // 1 second delay
   MAX_MESSAGE_LENGTH: 1800,
 } as const
