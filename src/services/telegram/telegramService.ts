@@ -151,7 +151,6 @@ export class TelegramService {
   async initialize(): Promise<void> {
     try {
       if (this.client.connected) {
-        logger.log('Telegram client already connected')
         this.isInitialized = true
         return
       }
@@ -357,7 +356,7 @@ export class TelegramService {
   }
 
   async searchPromotions(options: PromotionSearchOptions): Promise<TelegramMessage[]> {
-    const { channels, keywords = this.DEFAULT_KEYWORDS, limit = 20 } = options
+    const { channels, keywords = this.DEFAULT_KEYWORDS, limit = 20, maxAgeMinutes = 5 } = options
 
     if (!this.isInitialized) {
       await this.initialize()
@@ -371,12 +370,23 @@ export class TelegramService {
       try {
         const messages = await this.getChannelMessages(channel, limit)
 
-        const promotions = messages.filter((msg) => {
+        const candidatePromotions = messages.filter((msg) => {
           const hasKeywords = this.containsPromotionKeywords(msg.message || '', keywords)
           const hasMedia = msg.media && this.hasPromotionInMedia(msg)
-
           return hasKeywords || hasMedia
         })
+
+        const promotions = candidatePromotions.filter((msg) => {
+          return this.isMessageRecent(msg.date, maxAgeMinutes)
+        })
+
+        // Log only if significant number of promotions were filtered
+        const filteredCount = candidatePromotions.length - promotions.length
+        if (filteredCount > 5) {
+          logger.log(
+            `Filtered ${filteredCount} old promotions from ${channel} (older than ${maxAgeMinutes} minutes)`,
+          )
+        }
 
         allPromotions.push(...promotions)
       } catch (error) {
@@ -421,6 +431,19 @@ export class TelegramService {
       seen.add(key)
       return true
     })
+  }
+
+  /**
+   * Check if message is recent (within specified minutes)
+   */
+  private isMessageRecent(messageDate: number, maxMinutes: number): boolean {
+    const now = Math.floor(Date.now() / 1000) // Current timestamp in seconds
+    const messageAge = now - messageDate // Age in seconds
+    const maxAgeSeconds = maxMinutes * 60 // Convert minutes to seconds
+
+    const isRecent = messageAge <= maxAgeSeconds
+
+    return isRecent
   }
 
   getSessionString(): string {

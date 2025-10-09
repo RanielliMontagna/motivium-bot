@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, EmbedBuilder } from 'discord.js'
 import { createCommand } from '#base'
-import { getPromotionsService, PromotionCategory } from '#schedulers'
+import { PromotionCategory, CATEGORY_SPECIFIC_CONFIG, getPromotionsService } from '#schedulers'
 
 createCommand({
   name: 'promocoes',
@@ -16,6 +16,7 @@ createCommand({
       choices: [
         { name: 'Status das filas', value: 'status' },
         { name: 'Buscar promoções', value: 'search' },
+        { name: 'Configurações de tempo', value: 'timeconfig' },
       ],
     },
     {
@@ -100,6 +101,42 @@ createCommand({
           setTimeout(async () => {
             await interaction.editReply({ embeds: [successEmbed] })
           }, 2000)
+          break
+        }
+
+        case 'timeconfig': {
+          const categoryEmojis = {
+            [PromotionCategory.GENERAL]: '🎯',
+            [PromotionCategory.TECH]: '💻',
+            [PromotionCategory.GAMING]: '🎮',
+            [PromotionCategory.FITNESS]: '🏋️',
+            [PromotionCategory.AUTOMOTIVE]: '🚗',
+            [PromotionCategory.FASHION]: '👗',
+            [PromotionCategory.HOME]: '🏠',
+          }
+
+          const embed = new EmbedBuilder()
+            .setTitle('⏰ Configurações de Tempo por Categoria')
+            .setColor(0x007acc)
+            .setDescription('Limite de idade das promoções e frequência de busca:')
+            .setTimestamp()
+
+          const fields = []
+
+          for (const [category, config] of Object.entries(CATEGORY_SPECIFIC_CONFIG)) {
+            const emoji = categoryEmojis[category as PromotionCategory]
+            const categoryName = category.charAt(0) + category.slice(1).toLowerCase()
+
+            fields.push({
+              name: `${emoji} ${categoryName}`,
+              value: `⏱️ **Frequência**: ${config?.schedulePattern || 'Não definido'}\n⌛ **Limite**: ${config?.maxAgeMinutes || 'Não definido'} minutos`,
+              inline: true,
+            })
+          }
+
+          embed.addFields(fields)
+
+          await interaction.editReply({ embeds: [embed] })
           break
         }
 

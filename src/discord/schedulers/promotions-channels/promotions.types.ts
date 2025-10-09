@@ -15,6 +15,7 @@ export interface PromotionConfig {
   keywords: string[]
   schedulePattern: string
   maxPromotionsPerExecution: number
+  maxAgeMinutes?: number
 }
 
 export const PROMOTION_KEYWORDS = {
@@ -117,9 +118,11 @@ export const PROMOTION_KEYWORDS = {
     'película',
     'combustível',
     'lavagem',
-    'mecânico',
     'revisão',
     'seguro auto',
+    'android auto',
+    'apple carplay',
+    'gps',
   ] as const,
 
   [PromotionCategory.FASHION]: [
@@ -179,8 +182,9 @@ export const DEFAULT_PROMOTION_CONFIG: Omit<
   PromotionConfig,
   'category' | 'discordChannelIds' | 'telegramChannels' | 'keywords'
 > = {
-  schedulePattern: '*/1 * * * *', // A cada 1 minuto
+  schedulePattern: '*/5 * * * *', // A cada 5 minutos
   maxPromotionsPerExecution: 1,
+  maxAgeMinutes: 10, // Padrão: 10 minutos
 }
 
 // Configuração específica para GENERAL (mais frequente)
@@ -190,4 +194,47 @@ export const GENERAL_PROMOTION_CONFIG: Omit<
 > = {
   schedulePattern: '*/1 * * * *', // A cada 1 minuto
   maxPromotionsPerExecution: 1,
+  maxAgeMinutes: 5, // GENERAL: apenas 5 minutos para maior relevância
+}
+
+// Configurações específicas por categoria
+export const CATEGORY_SPECIFIC_CONFIG: Record<
+  PromotionCategory,
+  Partial<Pick<PromotionConfig, 'schedulePattern' | 'maxPromotionsPerExecution' | 'maxAgeMinutes'>>
+> = {
+  [PromotionCategory.GENERAL]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 5,
+  },
+  [PromotionCategory.TECH]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 5,
+  },
+  [PromotionCategory.GAMING]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 5,
+  },
+  [PromotionCategory.FITNESS]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 5,
+  },
+  [PromotionCategory.AUTOMOTIVE]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 60,
+  },
+  [PromotionCategory.FASHION]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 5,
+  },
+  [PromotionCategory.HOME]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 60,
+  },
 }

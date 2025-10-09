@@ -31,4 +31,5 @@ export interface PromotionSearchOptions {
   channels: string[]
   keywords?: string[]
   limit?: number
+  maxAgeMinutes?: number
 }

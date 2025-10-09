@@ -10,7 +10,7 @@ import {
   PromotionCategory,
   PROMOTION_KEYWORDS,
   DEFAULT_PROMOTION_CONFIG,
-  GENERAL_PROMOTION_CONFIG,
+  CATEGORY_SPECIFIC_CONFIG,
   type PromotionConfig,
 } from './promotions.types.js'
 import type { TelegramMessage } from '../../../services/telegram/telegramService.types.js'
@@ -63,6 +63,7 @@ export class PromotionsService {
 
   constructor(client: Client) {
     this.client = client
+    this.initialize()
   }
 
   /**
@@ -87,7 +88,8 @@ export class PromotionsService {
 
     if (generalChannels.length && generalTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.GENERAL, {
-        ...GENERAL_PROMOTION_CONFIG,
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.GENERAL],
         category: PromotionCategory.GENERAL,
         discordChannelIds: generalChannels,
         telegramChannels: generalTelegramChannels,
@@ -103,6 +105,7 @@ export class PromotionsService {
     if (techChannels.length && techTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.TECH, {
         ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.TECH],
         category: PromotionCategory.TECH,
         discordChannelIds: techChannels,
         telegramChannels: techTelegramChannels,
@@ -119,6 +122,7 @@ export class PromotionsService {
     if (gamingChannels.length && gamingTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.GAMING, {
         ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.GAMING],
         category: PromotionCategory.GAMING,
         discordChannelIds: gamingChannels,
         telegramChannels: gamingTelegramChannels,
@@ -135,6 +139,7 @@ export class PromotionsService {
     if (fitnessChannels.length && fitnessTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.FITNESS, {
         ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.FITNESS],
         category: PromotionCategory.FITNESS,
         discordChannelIds: fitnessChannels,
         telegramChannels: fitnessTelegramChannels,
@@ -151,6 +156,7 @@ export class PromotionsService {
     if (automotiveChannels.length && automotiveTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.AUTOMOTIVE, {
         ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.AUTOMOTIVE],
         category: PromotionCategory.AUTOMOTIVE,
         discordChannelIds: automotiveChannels,
         telegramChannels: automotiveTelegramChannels,
@@ -167,6 +173,7 @@ export class PromotionsService {
     if (fashionChannels.length && fashionTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.FASHION, {
         ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.FASHION],
         category: PromotionCategory.FASHION,
         discordChannelIds: fashionChannels,
         telegramChannels: fashionTelegramChannels,
@@ -182,6 +189,7 @@ export class PromotionsService {
     if (homeChannels.length && homeTelegramChannels.length) {
       this.promotionConfigs.set(PromotionCategory.HOME, {
         ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.HOME],
         category: PromotionCategory.HOME,
         discordChannelIds: homeChannels,
         telegramChannels: homeTelegramChannels,
@@ -194,6 +202,11 @@ export class PromotionsService {
    * Setup schedulers for each category
    */
   private setupSchedulers(): void {
+    if (this.promotionConfigs.size === 0) {
+      logger.warn('⚠️ No promotion configurations found! Check your environment variables.')
+      return
+    }
+
     for (const [category, config] of this.promotionConfigs) {
       cron.schedule(
         config.schedulePattern,
@@ -209,8 +222,6 @@ export class PromotionsService {
           name: `promotions-${category.toLowerCase()}`,
         },
       )
-
-      logger.log(`📅 Scheduled ${category} promotions: ${config.schedulePattern}`)
     }
   }
 
@@ -267,12 +278,15 @@ export class PromotionsService {
       const telegramService = getTelegramService()
       const cache = getPromotionCache(category)
 
-      logger.log(`🔍 Fetching ${category} promotions from ${telegramChannels.length} channels`)
+      // Get category-specific age limit
+      const categoryConfig = CATEGORY_SPECIFIC_CONFIG[category]
+      const maxAgeMinutes = categoryConfig?.maxAgeMinutes || DEFAULT_PROMOTION_CONFIG.maxAgeMinutes
 
       const promotions = await telegramService.searchPromotions({
         channels: telegramChannels,
         keywords,
         limit: 20,
+        maxAgeMinutes,
       })
 
       // Filter out already sent promotions
@@ -337,8 +351,6 @@ export class PromotionsService {
 
       // Try to send with image if available
       await this.sendPromotionWithMedia(channelId, promotion, emoji, categoryName, message)
-
-      logger.log(`Sent ${category} promotion from ${promotion.channel} to channel ${channelId}`)
     } catch (error) {
       logger.error(`Error sending ${category} promotion to channel ${channelId}:`, error)
     }
@@ -465,8 +477,6 @@ export class PromotionsService {
         embeds: [embed],
         files: [attachment],
       })
-
-      logger.log(`Sent promotion with image to channel ${channelId}`)
     } catch (error) {
       logger.error('Error sending Discord message with attachment:', error)
       throw error
@@ -485,4 +495,24 @@ export class PromotionsService {
 
     return stats
   }
+}
+
+// Singleton instance
+let promotionsServiceInstance: PromotionsService | null = null
+
+/**
+ * Initialize promotions system
+ */
+export function initializePromotions(client: Client): void {
+  if (!promotionsServiceInstance) {
+    promotionsServiceInstance = new PromotionsService(client)
+    logger.log('✅ Promotions service initialized')
+  }
+}
+
+/**
+ * Get promotions service instance
+ */
+export function getPromotionsService(): PromotionsService | null {
+  return promotionsServiceInstance
 }
