@@ -16,7 +16,7 @@ import glob from 'fast-glob'
 import {
   initializeCurrencyChannelsScheduler,
   initializeNewsChannelsScheduler,
-  initializePromotionsScheduler,
+  initializePromotions,
 } from '#schedulers'
 
 export const BASE_VERSION = '1.0.6' as const // DO NOT CHANGE THIS VAR
@@ -96,16 +96,8 @@ function createClient(token: string, options: BootstrapOptions) {
     initializeCurrencyChannelsScheduler(client)
     initializeNewsChannelsScheduler(client)
 
-    const promotionsChannelIds = process.env.PROMOTIONS_CHANNELS_IDS?.split(',') || []
-    const telegramChannels = process.env.TELEGRAM_PROMOTIONS_CHANNELS?.split(',') || []
-
-    if (promotionsChannelIds.length && telegramChannels.length) {
-      initializePromotionsScheduler({
-        client,
-        channelIds: promotionsChannelIds,
-        telegramChannels,
-      })
-    }
+    // Sistema unificado de promoções (inclui GERAL + categorias específicas)
+    initializePromotions(client)
 
     process.on('uncaughtException', (err) => baseErrorHandler(err, client))
     process.on('unhandledRejection', (err) => baseErrorHandler(err, client))

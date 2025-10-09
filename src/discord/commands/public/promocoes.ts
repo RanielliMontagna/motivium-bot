@@ -8,8 +8,8 @@ import {
 } from 'discord.js'
 
 createCommand({
-  name: 'promocoes',
-  description: 'Busca promoções nos canais do Telegram configurados',
+  name: 'promocoes-manual',
+  description: 'Busca manual de promoções nos canais do Telegram',
   type: ApplicationCommandType.ChatInput,
   options: [
     {
