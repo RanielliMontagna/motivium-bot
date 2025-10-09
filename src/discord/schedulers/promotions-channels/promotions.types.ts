@@ -133,7 +133,6 @@ export const PROMOTION_KEYWORDS = {
     'acessório',
     'fashion',
     'look',
-    'estilo',
     'calçado',
     'jaqueta',
     'blusa',
