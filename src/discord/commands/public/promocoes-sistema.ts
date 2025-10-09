@@ -32,6 +32,7 @@ createCommand({
         { name: '🚗 Automotivo', value: 'AUTOMOTIVE' },
         { name: '👗 Moda', value: 'FASHION' },
         { name: '🏠 Casa', value: 'HOME' },
+        { name: '🐛 Bugs', value: 'BUGS' },
       ],
     },
   ],
@@ -61,6 +62,7 @@ createCommand({
             [PromotionCategory.AUTOMOTIVE]: '🚗',
             [PromotionCategory.FASHION]: '👗',
             [PromotionCategory.HOME]: '🏠',
+            [PromotionCategory.BUGS]: '🐛',
           }
 
           const embed = new EmbedBuilder()
@@ -113,6 +115,7 @@ createCommand({
             [PromotionCategory.AUTOMOTIVE]: '🚗',
             [PromotionCategory.FASHION]: '👗',
             [PromotionCategory.HOME]: '🏠',
+            [PromotionCategory.BUGS]: '🐛',
           }
 
           const embed = new EmbedBuilder()

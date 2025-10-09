@@ -196,6 +196,22 @@ export class PromotionsService {
         keywords: [...PROMOTION_KEYWORDS[PromotionCategory.HOME]],
       })
     }
+
+    // Bugs Configuration
+    const bugsChannels = process.env.BUGS_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const bugsTelegramChannels =
+      process.env.BUGS_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (bugsChannels.length && bugsTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.BUGS, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.BUGS],
+        category: PromotionCategory.BUGS,
+        discordChannelIds: bugsChannels,
+        telegramChannels: bugsTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.BUGS]],
+      })
+    }
   }
 
   /**
@@ -327,6 +343,7 @@ export class PromotionsService {
         [PromotionCategory.AUTOMOTIVE]: '🚗',
         [PromotionCategory.FASHION]: '👗',
         [PromotionCategory.HOME]: '🏠',
+        [PromotionCategory.BUGS]: '🐛',
       }
 
       const categoryNames = {
@@ -337,6 +354,7 @@ export class PromotionsService {
         [PromotionCategory.AUTOMOTIVE]: 'Automotivo',
         [PromotionCategory.FASHION]: 'Moda',
         [PromotionCategory.HOME]: 'Casa',
+        [PromotionCategory.BUGS]: 'Bugs',
       }
 
       const emoji = categoryEmojis[category]

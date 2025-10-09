@@ -6,6 +6,7 @@ export enum PromotionCategory {
   AUTOMOTIVE = 'AUTOMOTIVE',
   FASHION = 'FASHION',
   HOME = 'HOME',
+  BUGS = 'BUGS',
 }
 
 export interface PromotionConfig {
@@ -176,6 +177,8 @@ export const PROMOTION_KEYWORDS = {
     'utensílio',
     'decorativo',
   ] as const,
+
+  [PromotionCategory.BUGS]: ['bug', 'bugs'] as const,
 }
 
 export const DEFAULT_PROMOTION_CONFIG: Omit<
@@ -236,5 +239,10 @@ export const CATEGORY_SPECIFIC_CONFIG: Record<
     schedulePattern: '*/1 * * * *',
     maxPromotionsPerExecution: 1,
     maxAgeMinutes: 60,
+  },
+  [PromotionCategory.BUGS]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 5,
   },
 }
