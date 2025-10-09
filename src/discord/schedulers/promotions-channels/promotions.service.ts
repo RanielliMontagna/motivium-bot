@@ -141,6 +141,53 @@ export class PromotionsService {
         keywords: [...PROMOTION_KEYWORDS[PromotionCategory.FITNESS]],
       })
     }
+
+    // Automotive Configuration
+    const automotiveChannels =
+      process.env.AUTOMOTIVE_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const automotiveTelegramChannels =
+      process.env.AUTOMOTIVE_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (automotiveChannels.length && automotiveTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.AUTOMOTIVE, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        category: PromotionCategory.AUTOMOTIVE,
+        discordChannelIds: automotiveChannels,
+        telegramChannels: automotiveTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.AUTOMOTIVE]],
+      })
+    }
+
+    // Fashion Configuration
+    const fashionChannels =
+      process.env.FASHION_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const fashionTelegramChannels =
+      process.env.FASHION_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (fashionChannels.length && fashionTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.FASHION, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        category: PromotionCategory.FASHION,
+        discordChannelIds: fashionChannels,
+        telegramChannels: fashionTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.FASHION]],
+      })
+    }
+
+    // Home Configuration
+    const homeChannels = process.env.HOME_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const homeTelegramChannels =
+      process.env.HOME_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (homeChannels.length && homeTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.HOME, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        category: PromotionCategory.HOME,
+        discordChannelIds: homeChannels,
+        telegramChannels: homeTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.HOME]],
+      })
+    }
   }
 
   /**
@@ -263,6 +310,9 @@ export class PromotionsService {
         [PromotionCategory.TECH]: '💻',
         [PromotionCategory.GAMING]: '🎮',
         [PromotionCategory.FITNESS]: '🏋️',
+        [PromotionCategory.AUTOMOTIVE]: '🚗',
+        [PromotionCategory.FASHION]: '👗',
+        [PromotionCategory.HOME]: '🏠',
       }
 
       const categoryNames = {
@@ -270,6 +320,9 @@ export class PromotionsService {
         [PromotionCategory.TECH]: 'Tech',
         [PromotionCategory.GAMING]: 'Gaming',
         [PromotionCategory.FITNESS]: 'Fitness',
+        [PromotionCategory.AUTOMOTIVE]: 'Automotivo',
+        [PromotionCategory.FASHION]: 'Moda',
+        [PromotionCategory.HOME]: 'Casa',
       }
 
       const emoji = categoryEmojis[category]

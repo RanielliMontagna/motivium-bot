@@ -28,6 +28,9 @@ createCommand({
         { name: '💻 Tech', value: 'TECH' },
         { name: '🎮 Gaming', value: 'GAMING' },
         { name: '🏋️ Fitness', value: 'FITNESS' },
+        { name: '🚗 Automotivo', value: 'AUTOMOTIVE' },
+        { name: '👗 Moda', value: 'FASHION' },
+        { name: '🏠 Casa', value: 'HOME' },
       ],
     },
   ],
@@ -54,6 +57,9 @@ createCommand({
             [PromotionCategory.TECH]: '💻',
             [PromotionCategory.GAMING]: '🎮',
             [PromotionCategory.FITNESS]: '🏋️',
+            [PromotionCategory.AUTOMOTIVE]: '🚗',
+            [PromotionCategory.FASHION]: '👗',
+            [PromotionCategory.HOME]: '🏠',
           }
 
           const embed = new EmbedBuilder()
