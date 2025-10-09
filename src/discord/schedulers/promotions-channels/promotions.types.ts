@@ -163,6 +163,7 @@ export const PROMOTION_KEYWORDS = {
     'cama',
     'armário',
     'geladeira',
+    'airfryer',
     'fogão',
     'microondas',
     'aspirador',
