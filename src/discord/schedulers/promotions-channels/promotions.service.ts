@@ -1,6 +1,6 @@
 import cron from 'node-cron'
 import NodeCache from 'node-cache'
-import { Client } from 'discord.js'
+import { Client, TextChannel, AttachmentBuilder, EmbedBuilder, Colors } from 'discord.js'
 
 import { logger } from '#settings'
 import { sendMessage } from '#utils'
@@ -328,23 +328,148 @@ export class PromotionsService {
       const emoji = categoryEmojis[category]
       const categoryName = categoryNames[category]
 
-      // Limit the message size
-      const cleanMessage = promotion.message.substring(0, 1800)
+      // Prepare message content
+      const cleanMessage = promotion.message ? promotion.message.substring(0, 1800) : ''
       const sourceFormatted = `-# 📢 Canal: ${promotion.channel.replace('@', '')}`
       const dateFormatted = new Date(promotion.date * 1000).toLocaleString('pt-BR')
 
       const message = `${cleanMessage}\n\n${sourceFormatted} • ${dateFormatted}`
 
-      await sendMessage({
-        client: this.client,
-        channelId,
-        title: `${emoji} Nova Promoção ${categoryName}!`,
-        message,
-      })
+      // Try to send with image if available
+      await this.sendPromotionWithMedia(channelId, promotion, emoji, categoryName, message)
 
       logger.log(`Sent ${category} promotion from ${promotion.channel} to channel ${channelId}`)
     } catch (error) {
       logger.error(`Error sending ${category} promotion to channel ${channelId}:`, error)
+    }
+  }
+
+  /**
+   * Send promotion with media attachment if available
+   */
+  private async sendPromotionWithMedia(
+    channelId: string,
+    promotion: TelegramMessage,
+    emoji: string,
+    categoryName: string,
+    message: string,
+  ): Promise<void> {
+    try {
+      // First try to send with image if it's a photo
+      if (promotion.media?.type === 'photo') {
+        const success = await this.sendPromotionWithImage(
+          channelId,
+          promotion,
+          emoji,
+          categoryName,
+          message,
+        )
+        if (success) return
+      }
+
+      // Fallback to regular message with media indicator
+      let mediaInfo = ''
+      if (promotion.media) {
+        const mediaType =
+          promotion.media.type === 'photo'
+            ? '📸'
+            : promotion.media.type === 'video'
+              ? '🎥'
+              : promotion.media.type === 'document'
+                ? '📄'
+                : '📎'
+        mediaInfo = `${mediaType} *Contém mídia (${promotion.media.type})*\n`
+      }
+
+      const finalMessage = promotion.message
+        ? `${message}\n\n${mediaInfo}`
+        : `${mediaInfo}${message}`
+
+      await sendMessage({
+        client: this.client,
+        channelId,
+        title: `${emoji} Nova Promoção ${categoryName}!`,
+        message: finalMessage,
+      })
+    } catch (error) {
+      logger.error('Error sending promotion with media:', error)
+    }
+  }
+
+  /**
+   * Send promotion with downloaded Telegram image
+   */
+  private async sendPromotionWithImage(
+    channelId: string,
+    promotion: TelegramMessage,
+    emoji: string,
+    categoryName: string,
+    message: string,
+  ): Promise<boolean> {
+    try {
+      if (!promotion.originalMessage) {
+        logger.warn('No original message available for media download')
+        return false
+      }
+
+      const telegramService = getTelegramService()
+      const mediaData = await telegramService.downloadMediaForDiscord(promotion.originalMessage)
+
+      if (!mediaData) {
+        logger.warn('Failed to download media from Telegram')
+        return false
+      }
+
+      // Send using Discord with attachment
+      await this.sendDiscordMessageWithAttachment(
+        channelId,
+        `${emoji} Nova Promoção ${categoryName}!`,
+        message,
+        mediaData.buffer,
+        mediaData.filename,
+      )
+
+      return true
+    } catch (error) {
+      logger.error('Error sending promotion with image:', error)
+      return false
+    }
+  }
+
+  /**
+   * Send Discord message with file attachment
+   */
+  private async sendDiscordMessageWithAttachment(
+    channelId: string,
+    title: string,
+    message: string,
+    buffer: Buffer,
+    filename: string,
+  ): Promise<void> {
+    try {
+      const channel = this.client.channels.cache.get(channelId) as TextChannel
+
+      if (!channel || !channel.isTextBased()) {
+        throw new Error(`Channel ${channelId} not found or not text-based`)
+      }
+
+      const attachment = new AttachmentBuilder(buffer, { name: filename })
+
+      const embed = new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(message)
+        .setImage(`attachment://${filename}`)
+        .setColor(Colors.Blue)
+
+      await channel.send({
+        embeds: [embed],
+        files: [attachment],
+      })
+
+      logger.log(`Sent promotion with image to channel ${channelId}`)
+    } catch (error) {
+      logger.error('Error sending Discord message with attachment:', error)
+      throw error
     }
   }
 

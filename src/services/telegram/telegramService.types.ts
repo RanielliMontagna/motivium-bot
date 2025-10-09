@@ -5,6 +5,18 @@ export interface TelegramMessage {
   channelId: string
   fromId?: string
   channel: string
+  media?: TelegramMediaInfo
+  originalMessage?: any // Store original Telegram message for media download
+}
+
+export interface TelegramMediaInfo {
+  type: 'photo' | 'document' | 'video' | 'sticker'
+  fileId?: string
+  fileName?: string
+  mimeType?: string
+  size?: number
+  thumbnail?: string
+  downloadUrl?: string
 }
 
 export interface TelegramServiceConfig {

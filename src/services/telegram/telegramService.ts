@@ -6,6 +6,7 @@ import type {
   TelegramMessage,
   TelegramServiceConfig,
   PromotionSearchOptions,
+  TelegramMediaInfo,
 } from './telegramService.types.js'
 
 // Global state to manage Telegram authentication
@@ -213,24 +214,130 @@ export class TelegramService {
   }
 
   private isValidMessage(msg: any): boolean {
-    return (
-      msg &&
-      msg.message &&
-      typeof msg.message === 'string' &&
-      msg.message.trim().length > 0 &&
-      msg.date &&
-      msg.id
-    )
+    // Allow messages with media even if text is empty
+    const hasText = msg.message && typeof msg.message === 'string' && msg.message.trim().length > 0
+    const hasMedia = msg.media
+
+    return msg && (hasText || hasMedia) && msg.date && msg.id
   }
 
   private mapToTelegramMessage(msg: any, channelUsername: string): TelegramMessage {
     return {
       id: msg.id,
-      message: msg.message.trim(),
+      message: msg.message?.trim() || '',
       date: msg.date,
       channelId: msg.peerId?.toString() || '',
       fromId: msg.fromId?.toString(),
       channel: channelUsername,
+      media: this.extractMediaInfo(msg),
+      originalMessage: msg, // Store for media download
+    }
+  }
+
+  private extractMediaInfo(msg: any): TelegramMediaInfo | undefined {
+    if (!msg.media) return undefined
+
+    try {
+      const media = msg.media
+
+      // Handle photos
+      if (media.className === 'MessageMediaPhoto' && media.photo) {
+        const photoId = this.extractIntegerId(media.photo.id)
+        const mediaInfo = {
+          type: 'photo' as const,
+          fileId: photoId,
+          size: this.getPhotoSize(media.photo),
+        }
+
+        return mediaInfo
+      }
+
+      // Handle documents (includes videos, GIFs, files)
+      if (media.className === 'MessageMediaDocument' && media.document) {
+        const doc = media.document
+        const mimeType = doc.mimeType || ''
+
+        let type: 'document' | 'video' | 'sticker' = 'document'
+        if (mimeType.startsWith('video/')) type = 'video'
+        if (
+          mimeType.startsWith('image/') &&
+          doc.attributes?.some((attr: any) => attr.className === 'DocumentAttributeSticker')
+        ) {
+          type = 'sticker'
+        }
+
+        return {
+          type,
+          fileId: this.extractIntegerId(doc.id),
+          fileName: this.getDocumentFileName(doc),
+          mimeType: doc.mimeType,
+          size: doc.size,
+        }
+      }
+
+      return undefined
+    } catch (error) {
+      logger.warn('Error extracting media info:', error)
+      return undefined
+    }
+  }
+
+  private getPhotoSize(photo: any): number | undefined {
+    try {
+      if (photo.sizes && Array.isArray(photo.sizes)) {
+        // Get the largest size
+        const largestSize = photo.sizes.reduce((prev: any, current: any) => {
+          const prevSize = (prev.w || 0) * (prev.h || 0)
+          const currentSize = (current.w || 0) * (current.h || 0)
+          return currentSize > prevSize ? current : prev
+        })
+        return largestSize.size
+      }
+    } catch (error) {
+      logger.warn('Error getting photo size:', error)
+    }
+    return undefined
+  }
+
+  private getDocumentFileName(doc: any): string | undefined {
+    try {
+      if (doc.attributes && Array.isArray(doc.attributes)) {
+        const fileNameAttr = doc.attributes.find(
+          (attr: any) => attr.className === 'DocumentAttributeFilename',
+        )
+        if (fileNameAttr && fileNameAttr.fileName) {
+          return fileNameAttr.fileName
+        }
+      }
+    } catch (error) {
+      logger.warn('Error getting document filename:', error)
+    }
+    return undefined
+  }
+
+  private extractIntegerId(id: any): string | undefined {
+    try {
+      if (!id) return undefined
+
+      // Handle BigInt Integer objects from Telegram
+      if (id.value !== undefined) {
+        return id.value.toString()
+      }
+
+      // Handle regular numbers/strings
+      if (typeof id === 'number' || typeof id === 'string') {
+        return id.toString()
+      }
+
+      // Handle BigInt directly
+      if (typeof id === 'bigint') {
+        return id.toString()
+      }
+
+      return id.toString()
+    } catch (error) {
+      logger.warn('Error extracting integer ID:', error)
+      return undefined
     }
   }
 
@@ -264,9 +371,12 @@ export class TelegramService {
       try {
         const messages = await this.getChannelMessages(channel, limit)
 
-        const promotions = messages.filter((msg) =>
-          this.containsPromotionKeywords(msg.message, keywords),
-        )
+        const promotions = messages.filter((msg) => {
+          const hasKeywords = this.containsPromotionKeywords(msg.message || '', keywords)
+          const hasMedia = msg.media && this.hasPromotionInMedia(msg)
+
+          return hasKeywords || hasMedia
+        })
 
         allPromotions.push(...promotions)
       } catch (error) {
@@ -276,6 +386,24 @@ export class TelegramService {
 
     // Sort by date (newest first) and remove duplicates
     return this.removeDuplicatePromotions(allPromotions.sort((a, b) => b.date - a.date))
+  }
+
+  private hasPromotionInMedia(msg: any): boolean {
+    // Check if message has media that could be promotional
+    if (!msg.media) return false
+
+    const media = msg.media
+
+    // Photos are often used for product promotions
+    if (media.className === 'MessageMediaPhoto') return true
+
+    // Videos could be product demos or promotional content
+    if (media.className === 'MessageMediaDocument' && media.document) {
+      const mimeType = media.document.mimeType || ''
+      return mimeType.startsWith('video/') || mimeType.startsWith('image/')
+    }
+
+    return false
   }
 
   private containsPromotionKeywords(message: string, keywords: string[]): boolean {
@@ -297,6 +425,79 @@ export class TelegramService {
 
   getSessionString(): string {
     return this.session.save() as string
+  }
+
+  /**
+   * Download media from Telegram and return as buffer
+   */
+  async downloadMedia(message: any): Promise<Buffer | null> {
+    try {
+      if (!this.isInitialized) {
+        await this.initialize()
+      }
+
+      this.scheduleAutoDisconnect()
+
+      if (!message.media) {
+        logger.warn('No media found in message')
+        return null
+      }
+
+      // Download the media
+      const buffer = await this.client.downloadMedia(message, {
+        workers: 1,
+        progressCallback: undefined,
+      })
+
+      if (buffer instanceof Buffer) {
+        logger.log(`Downloaded media: ${buffer.length} bytes`)
+        return buffer
+      }
+
+      return null
+    } catch (error) {
+      logger.error('Error downloading media:', error)
+      return null
+    }
+  }
+
+  /**
+   * Download media and prepare for Discord attachment
+   */
+  async downloadMediaForDiscord(msg: any): Promise<{ buffer: Buffer; filename: string } | null> {
+    try {
+      const buffer = await this.downloadMedia(msg)
+      if (!buffer) return null
+
+      // Determine file extension based on media type
+      let extension = 'jpg' // default
+      let filename = `telegram_media_${msg.id}`
+
+      if (msg.media?.className === 'MessageMediaPhoto') {
+        extension = 'jpg'
+        filename = `photo_${msg.id}.jpg`
+      } else if (msg.media?.className === 'MessageMediaDocument' && msg.media.document) {
+        const mimeType = msg.media.document.mimeType || ''
+        if (mimeType.startsWith('image/')) {
+          extension = mimeType.split('/')[1] || 'jpg'
+        } else if (mimeType.startsWith('video/')) {
+          extension = mimeType.split('/')[1] || 'mp4'
+        }
+
+        // Use original filename if available
+        const originalName = this.getDocumentFileName(msg.media.document)
+        if (originalName) {
+          filename = originalName
+        } else {
+          filename = `document_${msg.id}.${extension}`
+        }
+      }
+
+      return { buffer, filename }
+    } catch (error) {
+      logger.error('Error downloading media for Discord:', error)
+      return null
+    }
   }
 
   async disconnect(): Promise<void> {
