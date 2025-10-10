@@ -258,7 +258,7 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
     primary: ['aliexpress', 'ali', 'express'],
     secondary: [],
     contextRequired: [],
-    exclusions: [],
+    exclusions: ['shopee', 'mercado livre', 'magalu', 'amazon'],
     combinations: [],
   },
 
