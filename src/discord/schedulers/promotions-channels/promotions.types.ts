@@ -67,16 +67,24 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'ofertas',
       'especial',
       'amazon',
+      'amzn.to',
       'shopee',
       'mercado livre',
       'magalu',
+      'magazine luiza',
+      'casas bahia',
+      'extra',
+      'ponto',
+      'submarino',
     ],
     contextRequired: [],
-    exclusions: [],
+    exclusions: ['aliexpress', 'ali express'], // Excluir se for específico do AliExpress
     combinations: [
       ['r$', 'off'],
       ['preço', 'baixo'],
       ['oferta', 'especial'],
+      ['link', 'amazon'],
+      ['link', 'amzn.to'],
     ],
   },
 
@@ -109,7 +117,16 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'lg',
     ],
     contextRequired: [],
-    exclusions: ['facas', 'panela', 'cozinha', 'banheiro', 'decoração', 'móvel', 'casa'],
+    exclusions: [
+      'facas',
+      'panela',
+      'cozinha',
+      'banheiro',
+      'decoração',
+      'móvel',
+      'casa',
+      'frigideira',
+    ],
     combinations: [
       ['headset', 'gamer'],
       ['mouse', 'gamer'],
@@ -177,7 +194,7 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
 
   [PromotionCategory.AUTOMOTIVE]: {
     primary: ['automotivo', 'automotiva', 'carro', 'pneu', 'som automotivo', 'alarme', 'película'],
-    secondary: ['oficina', 'combustível', 'lavagem', 'revisão', 'seguro auto'],
+    secondary: ['oficina', 'combustível', 'revisão', 'seguro auto'],
     contextRequired: [],
     exclusions: [],
     combinations: [
@@ -242,7 +259,7 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'decorativo',
     ],
     contextRequired: [],
-    exclusions: ['gamer', 'gaming', 'playstation', 'xbox'],
+    exclusions: ['gamer', 'gaming', 'playstation', 'xbox', 'casas bahia'],
     combinations: [],
   },
 
@@ -255,10 +272,10 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
   },
 
   [PromotionCategory.ALIEXPRESS]: {
-    primary: ['aliexpress', 'ali', 'express'],
-    secondary: [],
+    primary: ['aliexpress'],
+    secondary: ['ali express', 'aliex'],
     contextRequired: [],
-    exclusions: ['shopee', 'mercado livre', 'magalu', 'amazon'],
+    exclusions: ['amazon', 'amzn.to', 'shopee', 'mercado livre', 'magalu', 'magazine luiza'],
     combinations: [],
   },
 

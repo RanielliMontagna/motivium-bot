@@ -6,13 +6,13 @@ import type { ClassificationResult, IMessageClassifier } from './telegramService
  * Follows Single Responsibility Principle - only handles message classification
  */
 export class SmartMessageClassifier implements IMessageClassifier {
-  private static readonly CONFIDENCE_THRESHOLD = 15
+  private static readonly CONFIDENCE_THRESHOLD = 20
   private static readonly WEIGHTS = {
     COMBINATION: 100,
     PRIMARY: 50,
     SECONDARY: 20,
     CONTEXT: 30,
-    AMBIGUOUS_PENALTY: -10,
+    AMBIGUOUS_PENALTY: -15,
   } as const
 
   /**
