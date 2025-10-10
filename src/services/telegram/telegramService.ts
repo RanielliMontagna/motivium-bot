@@ -7,7 +7,10 @@ import type {
   TelegramServiceConfig,
   PromotionSearchOptions,
   TelegramMediaInfo,
+  IMessageClassifier,
+  IPromotionSearchService,
 } from './telegramService.types.js'
+import { SmartMessageClassifier } from './messageClassifier.js'
 
 // Global state to manage Telegram authentication
 class TelegramAuthManager {
@@ -72,13 +75,14 @@ export class TelegramConnectionError extends TelegramError {
   }
 }
 
-export class TelegramService {
+export class TelegramService implements IPromotionSearchService {
   private client: any
   private session: any
   private config: TelegramServiceConfig
   private isInitialized: boolean = false
   private authManager = TelegramAuthManager.getInstance()
   private connectionTimeout: NodeJS.Timeout | null = null
+  private messageClassifier: IMessageClassifier
 
   private readonly DEFAULT_KEYWORDS = [
     'promoção',
@@ -93,9 +97,10 @@ export class TelegramService {
     'promo',
   ]
 
-  constructor(config: TelegramServiceConfig) {
+  constructor(config: TelegramServiceConfig, classifier?: IMessageClassifier) {
     this.validateConfig(config)
     this.config = config
+    this.messageClassifier = classifier || new SmartMessageClassifier()
 
     let sessionString = ''
     if (
@@ -356,7 +361,13 @@ export class TelegramService {
   }
 
   async searchPromotions(options: PromotionSearchOptions): Promise<TelegramMessage[]> {
-    const { channels, keywords = this.DEFAULT_KEYWORDS, limit = 20, maxAgeMinutes = 5 } = options
+    const {
+      channels,
+      keywords = this.DEFAULT_KEYWORDS,
+      limit = 20,
+      maxAgeMinutes = 5,
+      smartConfig,
+    } = options
 
     if (!this.isInitialized) {
       await this.initialize()
@@ -371,7 +382,18 @@ export class TelegramService {
         const messages = await this.getChannelMessages(channel, limit)
 
         const candidatePromotions = messages.filter((msg) => {
-          const hasKeywords = this.containsPromotionKeywords(msg.message || '', keywords)
+          if (smartConfig) {
+            const result = this.messageClassifier.classify(msg.message || '', smartConfig)
+            if (result.match) {
+              return true
+            }
+          }
+
+          // Fallback simples para compatibilidade (sempre ativo como backup)
+          const lowerMessage = (msg.message || '').toLowerCase()
+          const hasKeywords = keywords.some((keyword) =>
+            lowerMessage.includes(keyword.toLowerCase()),
+          )
           const hasMedia = msg.media && this.hasPromotionInMedia(msg)
           return hasKeywords || hasMedia
         })
@@ -414,11 +436,6 @@ export class TelegramService {
     }
 
     return false
-  }
-
-  private containsPromotionKeywords(message: string, keywords: string[]): boolean {
-    const lowerMessage = message.toLowerCase()
-    return keywords.some((keyword) => lowerMessage.includes(keyword.toLowerCase()))
   }
 
   private removeDuplicatePromotions(promotions: TelegramMessage[]): TelegramMessage[] {

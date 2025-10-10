@@ -1,5 +1,4 @@
 import cron from 'node-cron'
-import NodeCache from 'node-cache'
 import { Client, TextChannel, AttachmentBuilder, EmbedBuilder, Colors } from 'discord.js'
 
 import { logger } from '#settings'
@@ -9,17 +8,18 @@ import { TelegramService } from '#services'
 import {
   PromotionCategory,
   PROMOTION_KEYWORDS,
+  SMART_KEYWORDS,
   DEFAULT_PROMOTION_CONFIG,
   CATEGORY_SPECIFIC_CONFIG,
   type PromotionConfig,
 } from './promotions.types.js'
 import type { TelegramMessage } from '../../../services/telegram/telegramService.types.js'
-
-// Cache for each promotion category - 24 hours TTL
-const promotionCache = new Map<PromotionCategory, NodeCache>()
-
-// Queue for promotions by category
-const promotionQueues = new Map<PromotionCategory, TelegramMessage[]>()
+import type { PromotionQueueManager, PromotionCacheManager } from './domain/interfaces.js'
+import {
+  InMemoryPromotionQueueManager,
+  CacheBasedPromotionCacheManager,
+} from './infrastructure/repositories.js'
+import { FetchPromotionsUseCase } from './usecases/fetchPromotions.js'
 
 // Singleton for TelegramService to reuse connection
 let telegramServiceInstance: TelegramService | null = null
@@ -37,32 +37,27 @@ function getTelegramService(): TelegramService {
   return telegramServiceInstance
 }
 
-function getPromotionCache(category: PromotionCategory): NodeCache {
-  if (!promotionCache.has(category)) {
-    promotionCache.set(
-      category,
-      new NodeCache({
-        stdTTL: 86400, // 24 hours
-        checkperiod: 3600, // Check every 1 hour
-      }),
-    )
-  }
-  return promotionCache.get(category)!
-}
-
-function getPromotionQueue(category: PromotionCategory): TelegramMessage[] {
-  if (!promotionQueues.has(category)) {
-    promotionQueues.set(category, [])
-  }
-  return promotionQueues.get(category)!
-}
-
 export class PromotionsService {
   private client: Client
   private promotionConfigs: Map<PromotionCategory, PromotionConfig> = new Map()
+  private queueManager: PromotionQueueManager
+  private cacheManager: PromotionCacheManager
+  private fetchPromotionsUseCase: FetchPromotionsUseCase
 
-  constructor(client: Client) {
+  constructor(
+    client: Client,
+    queueManager?: PromotionQueueManager,
+    cacheManager?: PromotionCacheManager,
+  ) {
     this.client = client
+    this.queueManager = queueManager || new InMemoryPromotionQueueManager()
+    this.cacheManager = cacheManager || new CacheBasedPromotionCacheManager()
+    this.fetchPromotionsUseCase = new FetchPromotionsUseCase(
+      getTelegramService(),
+      this.queueManager,
+      this.cacheManager,
+      SMART_KEYWORDS,
+    )
     this.initialize()
   }
 
@@ -283,20 +278,20 @@ export class PromotionsService {
 
     try {
       // Fetch new promotions if the queue is empty
-      let queue = getPromotionQueue(category)
-      if (queue.length === 0) {
+      const queueSize = this.queueManager.getQueueSize(category)
+      if (queueSize === 0) {
         await this.fetchPromotionsForCategory(category, telegramChannels, keywords)
-        queue = getPromotionQueue(category)
       }
 
-      if (queue.length === 0) {
-        logger.warn(`No promotions available for ${category}`)
+      const currentQueueSize = this.queueManager.getQueueSize(category)
+      if (currentQueueSize === 0) {
+        logger.warn(`▲ No promotions available for ${category}`)
         return
       }
 
       // Process one channel at a time to avoid spam
       for (const channelId of discordChannelIds) {
-        const promotionsToSend = queue.splice(0, maxPromotionsPerExecution)
+        const promotionsToSend = this.queueManager.getNext(category, maxPromotionsPerExecution)
 
         if (promotionsToSend.length === 0) break
 
@@ -307,11 +302,8 @@ export class PromotionsService {
           await new Promise((resolve) => setTimeout(resolve, 2000))
         }
       }
-
-      // Update the queue
-      promotionQueues.set(category, queue)
     } catch (error) {
-      logger.error(`Error in ${category} promotions processing:`, error)
+      logger.error(`❌ Error in ${category} promotions processing:`, error)
     }
   }
 
@@ -324,38 +316,21 @@ export class PromotionsService {
     keywords: string[],
   ): Promise<void> {
     try {
-      const telegramService = getTelegramService()
-      const cache = getPromotionCache(category)
-
       // Get category-specific age limit
       const categoryConfig = CATEGORY_SPECIFIC_CONFIG[category]
       const maxAgeMinutes = categoryConfig?.maxAgeMinutes || DEFAULT_PROMOTION_CONFIG.maxAgeMinutes
 
-      const promotions = await telegramService.searchPromotions({
+      const criteria = {
+        category,
         channels: telegramChannels,
         keywords,
+        maxAgeMinutes: maxAgeMinutes || 5,
         limit: 20,
-        maxAgeMinutes,
-      })
-
-      // Filter out already sent promotions
-      const newPromotions = promotions.filter((promo) => !cache.has(`${promo.channel}_${promo.id}`))
-
-      if (newPromotions.length > 0) {
-        // Mark promotions as viewed
-        newPromotions.forEach((promo) => {
-          cache.set(`${promo.channel}_${promo.id}`, true)
-        })
-
-        // Add to the queue
-        const currentQueue = getPromotionQueue(category)
-        const updatedQueue = [...currentQueue, ...newPromotions]
-        promotionQueues.set(category, updatedQueue)
-
-        logger.success(`Added ${newPromotions.length} new ${category} promotions to queue`)
       }
+
+      await this.fetchPromotionsUseCase.execute(criteria)
     } catch (error) {
-      logger.error(`Error fetching ${category} promotions:`, error)
+      logger.error(`❌ Error fetching ${category} promotions:`, error)
     }
   }
 
@@ -545,7 +520,7 @@ export class PromotionsService {
     const stats: Record<PromotionCategory, number> = {} as any
 
     for (const category of Object.values(PromotionCategory)) {
-      stats[category] = getPromotionQueue(category).length
+      stats[category] = this.queueManager.getQueueSize(category)
     }
 
     return stats

@@ -1,3 +1,5 @@
+import { SmartKeywordConfig } from '#schedulers'
+
 export interface TelegramMessage {
   id: number
   message: string
@@ -32,4 +34,20 @@ export interface PromotionSearchOptions {
   keywords?: string[]
   limit?: number
   maxAgeMinutes?: number
+  smartConfig?: SmartKeywordConfig
+}
+
+export interface ClassificationResult {
+  match: boolean
+  confidence: number
+  reason: string
+  category?: string
+}
+
+export interface IMessageClassifier {
+  classify(message: string, config: any): ClassificationResult
+}
+
+export interface IPromotionSearchService {
+  searchPromotions(options: PromotionSearchOptions): Promise<TelegramMessage[]>
 }
