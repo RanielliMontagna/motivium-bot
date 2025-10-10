@@ -212,6 +212,39 @@ export class PromotionsService {
         keywords: [...PROMOTION_KEYWORDS[PromotionCategory.BUGS]],
       })
     }
+
+    const aliexpressChannels =
+      process.env.ALIEXPRESS_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const aliexpressTelegramChannels =
+      process.env.ALIEXPRESS_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (aliexpressChannels.length && aliexpressTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.ALIEXPRESS, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.ALIEXPRESS],
+        category: PromotionCategory.ALIEXPRESS,
+        discordChannelIds: aliexpressChannels,
+        telegramChannels: aliexpressTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.ALIEXPRESS]],
+      })
+    }
+
+    // Cupons Configuration
+    const cuponsChannels =
+      process.env.CUPONS_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const cuponsTelegramChannels =
+      process.env.CUPONS_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (cuponsChannels.length && cuponsTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.CUPONS, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.CUPONS],
+        category: PromotionCategory.CUPONS,
+        discordChannelIds: cuponsChannels,
+        telegramChannels: cuponsTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.CUPONS]],
+      })
+    }
   }
 
   /**
@@ -344,6 +377,8 @@ export class PromotionsService {
         [PromotionCategory.FASHION]: '👗',
         [PromotionCategory.HOME]: '🏠',
         [PromotionCategory.BUGS]: '🐛',
+        [PromotionCategory.ALIEXPRESS]: '🛒',
+        [PromotionCategory.CUPONS]: '🎫',
       }
 
       const categoryNames = {
@@ -355,6 +390,8 @@ export class PromotionsService {
         [PromotionCategory.FASHION]: 'Moda',
         [PromotionCategory.HOME]: 'Casa',
         [PromotionCategory.BUGS]: 'Bugs',
+        [PromotionCategory.ALIEXPRESS]: 'AliExpress',
+        [PromotionCategory.CUPONS]: 'Cupons',
       }
 
       const emoji = categoryEmojis[category]

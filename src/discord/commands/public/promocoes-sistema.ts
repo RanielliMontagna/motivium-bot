@@ -33,6 +33,8 @@ createCommand({
         { name: '👗 Moda', value: 'FASHION' },
         { name: '🏠 Casa', value: 'HOME' },
         { name: '🐛 Bugs', value: 'BUGS' },
+        { name: '🛒 AliExpress', value: 'ALIEXPRESS' },
+        { name: '🎫 Cupons', value: 'CUPONS' },
       ],
     },
   ],
@@ -63,6 +65,8 @@ createCommand({
             [PromotionCategory.FASHION]: '👗',
             [PromotionCategory.HOME]: '🏠',
             [PromotionCategory.BUGS]: '🐛',
+            [PromotionCategory.ALIEXPRESS]: '🛒',
+            [PromotionCategory.CUPONS]: '🎫',
           }
 
           const embed = new EmbedBuilder()
@@ -116,6 +120,8 @@ createCommand({
             [PromotionCategory.FASHION]: '👗',
             [PromotionCategory.HOME]: '🏠',
             [PromotionCategory.BUGS]: '🐛',
+            [PromotionCategory.ALIEXPRESS]: '🛒',
+            [PromotionCategory.CUPONS]: '🎫',
           }
 
           const embed = new EmbedBuilder()

@@ -7,6 +7,8 @@ export enum PromotionCategory {
   FASHION = 'FASHION',
   HOME = 'HOME',
   BUGS = 'BUGS',
+  ALIEXPRESS = 'ALIEXPRESS',
+  CUPONS = 'CUPONS',
 }
 
 export interface PromotionConfig {
@@ -109,6 +111,7 @@ export const PROMOTION_KEYWORDS = {
 
   [PromotionCategory.AUTOMOTIVE]: [
     'automotivo',
+    'automotiva',
     'carro',
     'acessório automotivo',
     'serviço automotivo',
@@ -123,7 +126,6 @@ export const PROMOTION_KEYWORDS = {
     'seguro auto',
     'android auto',
     'apple carplay',
-    'gps',
   ] as const,
 
   [PromotionCategory.FASHION]: [
@@ -179,28 +181,30 @@ export const PROMOTION_KEYWORDS = {
   ] as const,
 
   [PromotionCategory.BUGS]: ['bug', 'bugs'] as const,
+  [PromotionCategory.ALIEXPRESS]: ['aliexpress'] as const,
+  [PromotionCategory.CUPONS]: ['cupom'] as const,
 }
 
 export const DEFAULT_PROMOTION_CONFIG: Omit<
   PromotionConfig,
   'category' | 'discordChannelIds' | 'telegramChannels' | 'keywords'
 > = {
-  schedulePattern: '*/5 * * * *', // A cada 5 minutos
+  schedulePattern: '*/1 * * * *',
   maxPromotionsPerExecution: 1,
-  maxAgeMinutes: 10, // Padrão: 10 minutos
+  maxAgeMinutes: 10,
 }
 
-// Configuração específica para GENERAL (mais frequente)
+// Configuration for the GENERAL category
 export const GENERAL_PROMOTION_CONFIG: Omit<
   PromotionConfig,
   'category' | 'discordChannelIds' | 'telegramChannels' | 'keywords'
 > = {
-  schedulePattern: '*/1 * * * *', // A cada 1 minuto
+  schedulePattern: '*/1 * * * *',
   maxPromotionsPerExecution: 1,
-  maxAgeMinutes: 5, // GENERAL: apenas 5 minutos para maior relevância
+  maxAgeMinutes: 5,
 }
 
-// Configurações específicas por categoria
+// Configurations per category
 export const CATEGORY_SPECIFIC_CONFIG: Record<
   PromotionCategory,
   Partial<Pick<PromotionConfig, 'schedulePattern' | 'maxPromotionsPerExecution' | 'maxAgeMinutes'>>
@@ -244,5 +248,15 @@ export const CATEGORY_SPECIFIC_CONFIG: Record<
     schedulePattern: '*/1 * * * *',
     maxPromotionsPerExecution: 1,
     maxAgeMinutes: 5,
+  },
+  [PromotionCategory.ALIEXPRESS]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 15,
+  },
+  [PromotionCategory.CUPONS]: {
+    schedulePattern: '*/1 * * * *',
+    maxPromotionsPerExecution: 1,
+    maxAgeMinutes: 15,
   },
 }
