@@ -240,6 +240,39 @@ export class PromotionsService {
         keywords: [...PROMOTION_KEYWORDS[PromotionCategory.CUPONS]],
       })
     }
+
+    // Beleza Configuration
+    const beautyChannels =
+      process.env.BEAUTY_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const beautyTelegramChannels =
+      process.env.BEAUTY_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (beautyChannels.length && beautyTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.BEAUTY, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.BEAUTY],
+        category: PromotionCategory.BEAUTY,
+        discordChannelIds: beautyChannels,
+        telegramChannels: beautyTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.BEAUTY]],
+      })
+    }
+
+    // Food Configuration
+    const foodChannels = process.env.FOOD_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const foodTelegramChannels =
+      process.env.FOOD_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (foodChannels.length && foodTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.FOOD, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.FOOD],
+        category: PromotionCategory.FOOD,
+        discordChannelIds: foodChannels,
+        telegramChannels: foodTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.FOOD]],
+      })
+    }
   }
 
   /**
@@ -354,6 +387,8 @@ export class PromotionsService {
         [PromotionCategory.BUGS]: '🐛',
         [PromotionCategory.ALIEXPRESS]: '🛒',
         [PromotionCategory.CUPONS]: '🎫',
+        [PromotionCategory.BEAUTY]: '💄',
+        [PromotionCategory.FOOD]: '🍕',
       }
 
       const categoryNames = {
@@ -367,6 +402,8 @@ export class PromotionsService {
         [PromotionCategory.BUGS]: 'Bugs',
         [PromotionCategory.ALIEXPRESS]: 'AliExpress',
         [PromotionCategory.CUPONS]: 'Cupons',
+        [PromotionCategory.BEAUTY]: 'Beleza',
+        [PromotionCategory.FOOD]: 'Food',
       }
 
       const emoji = categoryEmojis[category]
