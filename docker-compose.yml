@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 services:
   bot:
     build:
@@ -65,7 +65,7 @@ services:
     image: bitnami/postgresql:13
     container_name: motivium-db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
