@@ -273,6 +273,23 @@ export class PromotionsService {
         keywords: [...PROMOTION_KEYWORDS[PromotionCategory.FOOD]],
       })
     }
+
+    // Hardware Configuration
+    const hardwareChannels =
+      process.env.HARDWARE_PROMOTIONS_CHANNELS_IDS?.split(',').filter(Boolean) || []
+    const hardwareTelegramChannels =
+      process.env.HARDWARE_TELEGRAM_CHANNELS?.split(',').filter(Boolean) || []
+
+    if (hardwareChannels.length && hardwareTelegramChannels.length) {
+      this.promotionConfigs.set(PromotionCategory.HARDWARE, {
+        ...DEFAULT_PROMOTION_CONFIG,
+        ...CATEGORY_SPECIFIC_CONFIG[PromotionCategory.HARDWARE],
+        category: PromotionCategory.HARDWARE,
+        discordChannelIds: hardwareChannels,
+        telegramChannels: hardwareTelegramChannels,
+        keywords: [...PROMOTION_KEYWORDS[PromotionCategory.HARDWARE]],
+      })
+    }
   }
 
   /**
@@ -389,6 +406,7 @@ export class PromotionsService {
         [PromotionCategory.CUPONS]: '🎫',
         [PromotionCategory.BEAUTY]: '💄',
         [PromotionCategory.FOOD]: '🍕',
+        [PromotionCategory.HARDWARE]: '🖥️',
       }
 
       const categoryNames = {
@@ -404,6 +422,7 @@ export class PromotionsService {
         [PromotionCategory.CUPONS]: 'Cupons',
         [PromotionCategory.BEAUTY]: 'Beleza',
         [PromotionCategory.FOOD]: 'Food',
+        [PromotionCategory.HARDWARE]: 'Hardware',
       }
 
       const emoji = categoryEmojis[category]

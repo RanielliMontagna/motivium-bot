@@ -80,6 +80,7 @@ export class TelegramService implements IPromotionSearchService {
   private session: any
   private config: TelegramServiceConfig
   private isInitialized: boolean = false
+  private initializationPromise: Promise<void> | null = null
   private authManager = TelegramAuthManager.getInstance()
   private connectionTimeout: NodeJS.Timeout | null = null
   private messageClassifier: IMessageClassifier
@@ -117,11 +118,12 @@ export class TelegramService implements IPromotionSearchService {
 
     this.session = new StringSession(sessionString)
     this.client = new TelegramClient(this.session, config.apiId, config.apiHash, {
-      connectionRetries: 3,
-      requestRetries: 2,
-      timeout: 10000, // 10 seconds
+      connectionRetries: 1,
+      requestRetries: 1,
+      timeout: 30000,
       useWSS: false,
-      floodSleepThreshold: 60,
+      floodSleepThreshold: 120,
+      autoReconnect: false,
     })
   }
 
@@ -154,6 +156,24 @@ export class TelegramService implements IPromotionSearchService {
   }
 
   async initialize(): Promise<void> {
+    if (this.initializationPromise) {
+      return this.initializationPromise
+    }
+
+    if (this.isInitialized && this.client.connected) {
+      return
+    }
+
+    this.initializationPromise = this._performInitialization()
+
+    try {
+      await this.initializationPromise
+    } finally {
+      this.initializationPromise = null
+    }
+  }
+
+  private async _performInitialization(): Promise<void> {
     try {
       if (this.client.connected) {
         this.isInitialized = true
@@ -172,24 +192,23 @@ export class TelegramService implements IPromotionSearchService {
         },
       })
 
-      const newSessionString = this.session.save()
-      if (newSessionString && newSessionString !== this.config.sessionString) {
-        logger.success(
-          `New session created. Add to your .env: TELEGRAM_SESSION_STRING=${newSessionString}`,
-        )
-      }
+      if (this.client.connected) {
+        this.isInitialized = true
+        logger.success('✓ Telegram client connected successfully')
 
-      this.isInitialized = true
-      logger.success('Telegram client connected successfully')
-    } catch (error) {
+        // Save session after successful connection
+        const sessionString = this.session.save()
+        if (sessionString && sessionString.length > 0) {
+          logger.log('Session saved successfully')
+        }
+      } else {
+        this.isInitialized = false
+        throw new TelegramConnectionError('Failed to establish connection')
+      }
+    } catch (error: any) {
       this.isInitialized = false
-
-      if (error instanceof TelegramAuthError) {
-        throw error
-      }
-
       logger.error('Failed to initialize Telegram client:', error)
-      throw new TelegramConnectionError('Failed to connect to Telegram', error as Error)
+      throw new TelegramConnectionError(`Initialization failed: ${error.message || error}`)
     }
   }
 
@@ -377,20 +396,33 @@ export class TelegramService implements IPromotionSearchService {
 
     const allPromotions: TelegramMessage[] = []
 
-    for (const channel of channels) {
+    for (let i = 0; i < channels.length; i++) {
+      const channel = channels[i]
       try {
+        if (i > 0) {
+          await new Promise((resolve) => setTimeout(resolve, 500)) // 500ms delay
+        }
+
         const messages = await this.getChannelMessages(channel, limit)
 
         const candidatePromotions = messages.filter((msg) => {
+          const text = msg.message || ''
+
           if (smartConfig) {
-            const result = this.messageClassifier.classify(msg.message || '', smartConfig)
+            const result = this.messageClassifier.classify(text, smartConfig)
+
+            // If classifier explicitly excluded the message, block it regardless of fallback
+            if (result.reason && result.reason.startsWith('Excluded by keyword')) {
+              return false
+            }
+
+            // If classifier positively matched, accept immediately
             if (result.match) {
               return true
             }
           }
 
-          // Fallback simples para compatibilidade (sempre ativo como backup)
-          const lowerMessage = (msg.message || '').toLowerCase()
+          const lowerMessage = text.toLowerCase()
           const hasKeywords = keywords.some((keyword) =>
             lowerMessage.includes(keyword.toLowerCase()),
           )
@@ -568,6 +600,7 @@ export class TelegramService implements IPromotionSearchService {
 
       this.client = null
       this.isInitialized = false
+      this.initializationPromise = null // Limpa promise de inicialização
     }
   }
 }

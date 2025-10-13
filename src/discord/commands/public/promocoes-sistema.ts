@@ -67,6 +67,9 @@ createCommand({
             [PromotionCategory.BUGS]: '🐛',
             [PromotionCategory.ALIEXPRESS]: '🛒',
             [PromotionCategory.CUPONS]: '🎫',
+            [PromotionCategory.BEAUTY]: '💄',
+            [PromotionCategory.FOOD]: '🍕',
+            [PromotionCategory.HARDWARE]: '🖥️',
           }
 
           const embed = new EmbedBuilder()
@@ -122,6 +125,9 @@ createCommand({
             [PromotionCategory.BUGS]: '🐛',
             [PromotionCategory.ALIEXPRESS]: '🛒',
             [PromotionCategory.CUPONS]: '🎫',
+            [PromotionCategory.BEAUTY]: '💄',
+            [PromotionCategory.FOOD]: '🍕',
+            [PromotionCategory.HARDWARE]: '🖥️',
           }
 
           const embed = new EmbedBuilder()
