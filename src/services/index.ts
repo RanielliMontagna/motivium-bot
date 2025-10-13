@@ -20,3 +20,7 @@ export * from './football/brasileirao-scraper.js'
 // Weather service
 export * from './weather/weatherService.js'
 export * from './weather/weatherService.types.js'
+
+// Telegram Services
+export * from './telegram/telegramService.js'
+export * from './telegram/telegramService.types.js'

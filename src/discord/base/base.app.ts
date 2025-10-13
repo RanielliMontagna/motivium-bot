@@ -13,7 +13,11 @@ import { baseResponderHandler } from './base.responder.js'
 import ck from 'chalk'
 import glob from 'fast-glob'
 
-import { initializeCurrencyChannelsScheduler, initializeNewsChannelsScheduler } from '#schedulers'
+import {
+  initializeCurrencyChannelsScheduler,
+  initializeNewsChannelsScheduler,
+  initializePromotions,
+} from '#schedulers'
 
 export const BASE_VERSION = '1.0.6' as const // DO NOT CHANGE THIS VAR
 
@@ -91,6 +95,9 @@ function createClient(token: string, options: BootstrapOptions) {
     await baseRegisterCommands(client)
     initializeCurrencyChannelsScheduler(client)
     initializeNewsChannelsScheduler(client)
+
+    // Sistema unificado de promoções (inclui GERAL + categorias específicas)
+    initializePromotions(client)
 
     process.on('uncaughtException', (err) => baseErrorHandler(err, client))
     process.on('unhandledRejection', (err) => baseErrorHandler(err, client))

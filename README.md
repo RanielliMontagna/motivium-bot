@@ -13,7 +13,7 @@ A powerful Discord bot built with TypeScript and modern best practices, featurin
 [Getting Started](#-getting-started) •
 [Development](#-development) •
 [Deployment](#-deployment) •
-[Acknowledgments](#-acknowledgments) 
+[Acknowledgments](#-acknowledgments)
 
 </div>
 
@@ -26,10 +26,15 @@ A powerful Discord bot built with TypeScript and modern best practices, featurin
 - 🏙️ **CEP Command**: Get information about a Brazil CEP code
 - 🏋️ **BMI Calculator**: Calculate your Body Mass Index with ease
 - 📰 **News Updates**: Get the latest news from various sources
-   - 🗞️ **Investing.com - Economy**: Stay updated with the latest economic news
-   - 🗞️ **The Verge - AI**:  Get the latest news on AI from The Verge
-   - 🗞️ **The Verge - Space**: Stay updated with the latest space news from The Verge
-   - 🗞️ **The Verge - Tech**: Stay updated with the latest tech news from The Verge
+  - 🗞️ **Investing.com - Economy**: Stay updated with the latest economic news
+  - 🗞️ **The Verge - AI**: Get the latest news on AI from The Verge
+  - 🗞️ **The Verge - Space**: Stay updated with the latest space news from The Verge
+  - 🗞️ **The Verge - Tech**: Stay updated with the latest tech news from The Verge
+- 🛍️ **Telegram Promotions**: Automated promotion monitoring from Telegram channels
+  - 🔍 **Smart Filtering**: Automatically detects promotions using keywords
+  - 📱 **Multi-Channel Support**: Monitor multiple Telegram channels simultaneously
+  - 🚫 **Duplicate Prevention**: Cache system prevents sending duplicate promotions
+  - ⏰ **Scheduled Updates**: Checks for new promotions every 2 hours
 - 🔄 **Scheduled Messages**: Configurable message scheduling system
 - 🛠️ **Modern Architecture**: Built with TypeScript and modern development practices
 - 🚀 **CI/CD Pipeline**: Automated testing and deployment
@@ -109,7 +114,7 @@ docker-compose up -d
 ## 🙏 Acknowledgments
 
 - [Discord.js](https://discord.js.org/) for the amazing Discord API wrapper library used in this project
-- [Constatic CLI](https://github.com/rinckodev/constatic) for the project base structure 
+- [Constatic CLI](https://github.com/rinckodev/constatic) for the project base structure
 
 ## 📝 License
 
