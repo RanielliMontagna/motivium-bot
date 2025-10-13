@@ -61,6 +61,7 @@ jobs:
             BRAZIL_NEWS_CHANNELS_IDS=${{ secrets.BRAZIL_NEWS_CHANNELS_IDS }}
             ECONOMY_NEWS_CHANNELS_IDS=${{ secrets.ECONOMY_NEWS_CHANNELS_IDS }}
             DATABASE_URL=${{ secrets.DATABASE_URL }}
+            WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}
             DB_USER=${{ secrets.DB_USER }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_NAME=${{ secrets.DB_NAME }}
