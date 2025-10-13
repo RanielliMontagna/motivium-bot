@@ -137,6 +137,10 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'móvel',
       'casa',
       'frigideira',
+      'moletom',
+      'roupa',
+      'tênis',
+      'camisa',
     ],
     combinations: [
       ['headset', 'gamer'],
