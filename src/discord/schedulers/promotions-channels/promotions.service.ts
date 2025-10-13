@@ -65,6 +65,14 @@ export class PromotionsService {
    * Initialize schedulers for all configured categories
    */
   initialize(): void {
+    // Check if promotions are enabled via environment variable
+    const promotionsEnabled = process.env.PROMOTIONS_ENABLED !== 'false'
+
+    if (!promotionsEnabled) {
+      logger.warn('🚫 Promotions system is DISABLED via PROMOTIONS_ENABLED environment variable')
+      return
+    }
+
     this.loadPromotionConfigurations()
     this.setupSchedulers()
 
@@ -323,6 +331,12 @@ export class PromotionsService {
    * Process promotions for a specific category
    */
   private async processPromotions(config: PromotionConfig): Promise<void> {
+    // Double-check if promotions are still enabled (safety check)
+    const promotionsEnabled = process.env.PROMOTIONS_ENABLED !== 'false'
+    if (!promotionsEnabled) {
+      return // Silently skip processing if disabled
+    }
+
     const { category, discordChannelIds, telegramChannels, keywords, maxPromotionsPerExecution } =
       config
 
