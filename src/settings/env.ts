@@ -27,6 +27,43 @@ const envSchema = z.object({
 
   // Weather
   WEATHER_API_KEY: z.string().optional(),
+
+  // Telegram Configuration
+  PROMOTIONS_ENABLED: z.string().optional().default('true'),
+
+  TELEGRAM_API_ID: z.string().optional(),
+  TELEGRAM_API_HASH: z.string().optional(),
+  TELEGRAM_PHONE_NUMBER: z.string().optional(),
+  TELEGRAM_PASSWORD: z.string().optional(),
+  TELEGRAM_SESSION_STRING: z.string().optional(),
+
+  // Promotions Channels - General
+  PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  TELEGRAM_PROMOTIONS_CHANNELS: z.string().optional(),
+  TECH_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  TECH_TELEGRAM_CHANNELS: z.string().optional(),
+  GAMING_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  GAMING_TELEGRAM_CHANNELS: z.string().optional(),
+  FITNESS_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  FITNESS_TELEGRAM_CHANNELS: z.string().optional(),
+  AUTOMOTIVE_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  AUTOMOTIVE_TELEGRAM_CHANNELS: z.string().optional(),
+  FASHION_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  FASHION_TELEGRAM_CHANNELS: z.string().optional(),
+  HOME_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  HOME_TELEGRAM_CHANNELS: z.string().optional(),
+  BUGS_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  BUGS_TELEGRAM_CHANNELS: z.string().optional(),
+  ALIEXPRESS_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  ALIEXPRESS_TELEGRAM_CHANNELS: z.string().optional(),
+  CUPONS_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  CUPONS_TELEGRAM_CHANNELS: z.string().optional(),
+  BEAUTY_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  BEAUTY_TELEGRAM_CHANNELS: z.string().optional(),
+  FOOD_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  FOOD_TELEGRAM_CHANNELS: z.string().optional(),
+  HARDWARE_PROMOTIONS_CHANNELS_IDS: z.string().optional(),
+  HARDWARE_TELEGRAM_CHANNELS: z.string().optional(),
 })
 
 type EnvSchema = z.infer<typeof envSchema>
