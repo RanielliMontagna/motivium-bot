@@ -76,6 +76,9 @@ export class TelegramConnectionError extends TelegramError {
 }
 
 export class TelegramService implements IPromotionSearchService {
+  private static instance: TelegramService | null = null
+  private static instanceConfig: string = ''
+
   private client: any
   private session: any
   private config: TelegramServiceConfig
@@ -98,7 +101,7 @@ export class TelegramService implements IPromotionSearchService {
     'promo',
   ]
 
-  constructor(config: TelegramServiceConfig, classifier?: IMessageClassifier) {
+  private constructor(config: TelegramServiceConfig, classifier?: IMessageClassifier) {
     this.validateConfig(config)
     this.config = config
     this.messageClassifier = classifier || new SmartMessageClassifier()
@@ -118,13 +121,77 @@ export class TelegramService implements IPromotionSearchService {
 
     this.session = new StringSession(sessionString)
     this.client = new TelegramClient(this.session, config.apiId, config.apiHash, {
-      connectionRetries: 1,
-      requestRetries: 1,
-      timeout: 30000,
+      connectionRetries: 3,
+      requestRetries: 3,
+      timeout: 60000,
       useWSS: false,
       floodSleepThreshold: 120,
       autoReconnect: false,
+      retryDelay: 1000,
     })
+  }
+
+  static getInstance(
+    config?: TelegramServiceConfig,
+    classifier?: IMessageClassifier,
+  ): TelegramService {
+    const configKey = config ? `${config.apiId}-${config.apiHash}-${config.sessionString}` : ''
+
+    // If no instance exists or config changed, create new one
+    if (!TelegramService.instance || (config && TelegramService.instanceConfig !== configKey)) {
+      if (TelegramService.instance) {
+        // Disconnect previous instance
+        TelegramService.instance
+          .disconnect()
+          .catch((err) => logger.warn('Error disconnecting previous instance:', err))
+      }
+
+      if (!config) {
+        throw new Error('Config is required for first getInstance call')
+      }
+
+      TelegramService.instance = new TelegramService(config, classifier)
+      TelegramService.instanceConfig = configKey
+    }
+
+    return TelegramService.instance
+  }
+
+  static resetInstance(): void {
+    if (TelegramService.instance) {
+      TelegramService.instance
+        .disconnect()
+        .catch((err) => logger.warn('Error disconnecting during reset:', err))
+      TelegramService.instance = null
+      TelegramService.instanceConfig = ''
+    }
+  }
+
+  static async forceNewAuth(
+    config: TelegramServiceConfig,
+    classifier?: IMessageClassifier,
+  ): Promise<TelegramService> {
+    // Completely reset the instance
+    TelegramService.resetInstance()
+
+    logger.log('🔄 Starting new Telegram authentication with clean session...')
+
+    // Wait a bit to ensure previous connections were closed
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    // Create new instance with clean session and optimized settings
+    const cleanConfig = {
+      ...config,
+      sessionString: '', // Force empty session
+    }
+
+    const instance = new TelegramService(cleanConfig, classifier)
+
+    TelegramService.instance = instance
+    TelegramService.instanceConfig = `${cleanConfig.apiId}-${cleanConfig.apiHash}-`
+
+    logger.log('✓ New Telegram instance created - ready for authentication')
+    return instance
   }
 
   static submitSMSCode(code: string): boolean {
@@ -156,18 +223,30 @@ export class TelegramService implements IPromotionSearchService {
   }
 
   async initialize(): Promise<void> {
+    // If initialization is already in progress, wait for it
     if (this.initializationPromise) {
       return this.initializationPromise
     }
 
-    if (this.isInitialized && this.client.connected) {
+    // If already initialized and connected, do nothing
+    if (this.isInitialized && this.client?.connected) {
       return
+    }
+
+    // If initialized but not connected, force reinitialization
+    if (this.isInitialized && this.client && !this.client.connected) {
+      logger.warn('Client was initialized but not connected, forcing reinitialization')
+      this.isInitialized = false
     }
 
     this.initializationPromise = this._performInitialization()
 
     try {
       await this.initializationPromise
+    } catch (error) {
+      // In case of error, clear state to allow new attempts
+      this.isInitialized = false
+      throw error
     } finally {
       this.initializationPromise = null
     }
@@ -175,19 +254,60 @@ export class TelegramService implements IPromotionSearchService {
 
   private async _performInitialization(): Promise<void> {
     try {
-      if (this.client.connected) {
+      logger.log('🔗 Starting Telegram connection...')
+
+      // If already connected, no need to do anything
+      if (this.client?.connected) {
         this.isInitialized = true
+        logger.log('✓ Client was already connected')
         return
       }
 
+      // If client exists but not connected, or doesn't exist, create/recreate
+      if (!this.client || (this.client && !this.client.connected)) {
+        try {
+          if (this.client) {
+            logger.log('🔄 Destroying previous client...')
+            await this.client.destroy()
+          }
+        } catch (error) {
+          logger.warn('Error destroying old client:', error)
+        }
+
+        // Always recreate client with new instance
+        logger.log('🔨 Creating Telegram client...')
+        this.client = new TelegramClient(this.session, this.config.apiId, this.config.apiHash, {
+          connectionRetries: 3,
+          requestRetries: 3,
+          timeout: 60000,
+          useWSS: false,
+          floodSleepThreshold: 120,
+          autoReconnect: false,
+          retryDelay: 1000,
+        })
+      }
+
+      logger.log('📱 Starting authentication process...')
+
       await this.client.start({
-        phoneNumber: async () => this.config.phoneNumber || '',
-        password: async () => this.config.password || '',
+        phoneNumber: async () => {
+          const phone = this.config.phoneNumber || ''
+          logger.log(`📞 Using number: ${phone}`)
+          return phone
+        },
+        password: async () => {
+          const password = this.config.password || ''
+          if (password) {
+            logger.log('🔐 2FA password configured')
+          }
+          return password
+        },
         phoneCode: async () => {
+          logger.log('📨 Waiting for SMS code...')
           return await this.authManager.waitForCode()
         },
         onError: (err: any) => {
-          logger.error('Telegram auth error:', err)
+          logger.error('❌ Telegram auth error:', err)
           throw new TelegramAuthError(`Authentication failed: ${err.message || err}`)
         },
       })
@@ -208,6 +328,13 @@ export class TelegramService implements IPromotionSearchService {
     } catch (error: any) {
       this.isInitialized = false
       logger.error('Failed to initialize Telegram client:', error)
+
+      // If it's a duplicate key error, reset instance to force recreation
+      if (error.message && error.message.includes('AUTH_KEY_DUPLICATED')) {
+        logger.warn('AUTH_KEY_DUPLICATED detected, resetting instance...')
+        TelegramService.resetInstance()
+      }
+
       throw new TelegramConnectionError(`Initialization failed: ${error.message || error}`)
     }
   }
@@ -574,20 +701,29 @@ export class TelegramService implements IPromotionSearchService {
 
   async disconnect(): Promise<void> {
     try {
-      if (this.client && this.client.connected) {
+      if (this.client) {
         // Stop the update loop before disconnecting
         if (this.client._updateLoop) {
           this.client._updateLoop = false
         }
 
-        await Promise.race([
-          this.client.disconnect(),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Disconnect timeout')), 5000),
-          ),
-        ])
+        // Try to disconnect gracefully first
+        if (this.client.connected) {
+          await Promise.race([
+            this.client.disconnect(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Disconnect timeout')), 5000),
+            ),
+          ])
+        }
 
-        logger.log('Telegram client disconnected')
+        // Completely destroy client to free resources
+        try {
+          await this.client.destroy()
+          logger.log('Telegram client disconnected and destroyed')
+        } catch (destroyError) {
+          logger.warn('Error destroying client:', destroyError)
+        }
       }
     } catch (error) {
       logger.warn('Error disconnecting Telegram client (forced):', error)
@@ -598,9 +734,9 @@ export class TelegramService implements IPromotionSearchService {
         this.connectionTimeout = null
       }
 
-      this.client = null
+      // Don't set client as null to avoid "cannot read properties of null" errors
       this.isInitialized = false
-      this.initializationPromise = null // Limpa promise de inicialização
+      this.initializationPromise = null // Clear initialization promise
     }
   }
 }

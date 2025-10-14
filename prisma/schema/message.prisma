@@ -1,7 +1,0 @@
-model Message {
-    id        String   @id @default(uuid())
-    channelId String
-    user      String
-    content   String
-    timestamp DateTime
-}

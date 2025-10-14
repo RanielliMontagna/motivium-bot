@@ -1,9 +1,40 @@
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["prismaSchemaFolder"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  channelId String
+  user      String
+  content   String
+  timestamp DateTime
+}
+
+model Guild {
+  id           String         @id
+  name         String
+  GuildChannel GuildChannel[]
+}
+
+model GuildChannel {
+  name String @id
+
+  id  String
+  url String
+
+  guild   Guild  @relation(fields: [guildId], references: [id])
+  guildId String
+
+  @@map("guild_channels")
+}
+
+model Member {
+  id      String @id @default(uuid())
+  userId  String
+  guildId String
 }
