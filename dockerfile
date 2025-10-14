@@ -46,7 +46,6 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY package.json pnpm-lock.yaml ./
-COPY prisma ./prisma
 
 # Install only production dependencies with optimized settings
 RUN pnpm config set network-timeout 300000 && \
@@ -55,7 +54,10 @@ RUN pnpm config set network-timeout 300000 && \
     pnpm config set fetch-retry-maxtimeout 60000 && \
     pnpm install --frozen-lockfile --prod=true --ignore-scripts
 
-# Generate Prisma Client manually after production install
+# Copy prisma files after install to avoid issues with postinstall scripts
+COPY prisma/ ./prisma/
+
+# Generate Prisma Client manually after copying prisma files
 RUN npx prisma generate --schema=./prisma/schema/schema.prisma
 
 COPY --from=builder /usr/src/app/build ./build
