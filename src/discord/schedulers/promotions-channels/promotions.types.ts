@@ -405,6 +405,7 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'amstel',
       'pepsi',
       'coca-cola',
+      'hemmer',
     ],
     secondary: ['menu', 'cardápio', 'pedido', 'delivery grátis', 'heinz'],
     contextRequired: [],
