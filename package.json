@@ -35,7 +35,7 @@
     "node-cache": "5.1.2",
     "node-cron": "^4.2.1",
     "node-html-to-image": "5.0.0",
-    "openai": "4.90.0",
+    "openai": "6.3.0",
     "puppeteer": "24.23.0",
     "rou3": "0.7.7",
     "rss-parser": "3.13.0",

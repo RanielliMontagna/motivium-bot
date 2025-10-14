@@ -17,7 +17,7 @@ export async function getChatGPTResponse(message: string, history: Message[]) {
       ...formattedHistory,
       { role: 'user', content: message },
     ],
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     max_tokens: 1024,
     temperature: 1,
   })
