@@ -1,7 +1,7 @@
 # ===============================
 # Stage 1: Build
 # ===============================
-FROM node:23.9-alpine AS builder
+FROM node:24-alpine3.21 AS builder
 
 WORKDIR /usr/src/app
 
@@ -21,7 +21,7 @@ RUN pnpm run build
 # ===============================
 # Stage 2: Production
 # ===============================
-FROM node:23.9-alpine AS runner
+FROM node:24-alpine3.21 AS runner
 
 WORKDIR /usr/src/app
 
