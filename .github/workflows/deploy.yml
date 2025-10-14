@@ -28,8 +28,10 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/motivium-bot:buildcache,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
 
       - name: Deploy to VM
         uses: appleboy/ssh-action@v1.2.2
@@ -102,14 +104,18 @@ jobs:
             # Pull in the repository
             git pull
 
-            # Pull the latest image from Docker Hub
-            docker pull ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest
-
-            # Stop and remove any old containers
+            # Clean up old containers and images
             docker-compose down || true
+            docker system prune -f || true
+
+            # Pull the latest image from Docker Hub with timeout
+            timeout 600 docker pull ${{ secrets.DOCKER_USERNAME }}/motivium-bot:latest || {
+              echo "Docker pull failed or timed out, attempting to build locally"
+              docker-compose build --no-cache
+            }
 
             # Start the containers using Docker Compose
-            docker-compose up -d --build
+            docker-compose up -d
 
-            # Remove all unused images and containers
-            sudo docker system prune --all -f
+            # Clean up unused images and containers
+            docker system prune -f || true
