@@ -53,6 +53,9 @@ importers:
       openai:
         specifier: 6.3.0
         version: 6.3.0(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(zod@4.1.12)
+      prisma:
+        specifier: 6.17.1
+        version: 6.17.1(magicast@0.3.5)(typescript@5.8.2)
       puppeteer:
         specifier: 24.23.0
         version: 24.23.0(bufferutil@4.0.9)(typescript@5.8.2)(utf-8-validate@5.0.10)
@@ -102,9 +105,6 @@ importers:
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
-      prisma:
-        specifier: 6.17.1
-        version: 6.17.1(magicast@0.3.5)(typescript@5.8.2)
       tsx:
         specifier: 4.20.6
         version: 4.20.6
