@@ -1,3 +1,15 @@
 build
 coverage
 node_modules
+.git
+.github
+*.md
+.env*
+.vscode
+*.log
+.DS_Store
+Thumbs.db
+vitest.config.ts
+vitest.setup.ts
+eslint.config.js
+.gitignore

@@ -1,5 +1,7 @@
 services:
   bot:
+    # Try to use the image from registry first, fallback to build if needed
+    image: ${DOCKER_USERNAME}/motivium-bot:latest
     build:
       context: .
       dockerfile: Dockerfile
