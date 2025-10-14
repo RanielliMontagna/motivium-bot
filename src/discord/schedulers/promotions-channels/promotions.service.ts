@@ -22,19 +22,14 @@ import {
 import { FetchPromotionsUseCase } from './usecases/fetchPromotions.js'
 
 // Singleton for TelegramService to reuse connection
-let telegramServiceInstance: TelegramService | null = null
-
 function getTelegramService(): TelegramService {
-  if (!telegramServiceInstance) {
-    telegramServiceInstance = new TelegramService({
-      apiId: Number(process.env.TELEGRAM_API_ID),
-      apiHash: process.env.TELEGRAM_API_HASH!,
-      phoneNumber: process.env.TELEGRAM_PHONE_NUMBER,
-      password: process.env.TELEGRAM_PASSWORD,
-      sessionString: process.env.TELEGRAM_SESSION_STRING,
-    })
-  }
-  return telegramServiceInstance
+  return TelegramService.getInstance({
+    apiId: Number(process.env.TELEGRAM_API_ID),
+    apiHash: process.env.TELEGRAM_API_HASH!,
+    phoneNumber: process.env.TELEGRAM_PHONE_NUMBER,
+    password: process.env.TELEGRAM_PASSWORD,
+    sessionString: process.env.TELEGRAM_SESSION_STRING,
+  })
 }
 
 export class PromotionsService {

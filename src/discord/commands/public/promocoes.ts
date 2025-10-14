@@ -35,7 +35,7 @@ createCommand({
 
       const channelsToSearch = channelName ? [channelName] : telegramChannels
 
-      const telegramService = new TelegramService({
+      const telegramService = TelegramService.getInstance({
         apiId: Number(process.env.TELEGRAM_API_ID),
         apiHash: process.env.TELEGRAM_API_HASH!,
         phoneNumber: process.env.TELEGRAM_PHONE_NUMBER,
