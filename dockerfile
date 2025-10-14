@@ -53,7 +53,10 @@ RUN pnpm config set network-timeout 300000 && \
     pnpm config set fetch-retries 5 && \
     pnpm config set fetch-retry-mintimeout 10000 && \
     pnpm config set fetch-retry-maxtimeout 60000 && \
-    pnpm install --frozen-lockfile --prod=true
+    pnpm install --frozen-lockfile --prod=true --ignore-scripts
+
+# Generate Prisma Client manually after production install
+RUN npx prisma generate --schema=./prisma/schema/schema.prisma
 
 COPY --from=builder /usr/src/app/build ./build
 COPY --from=builder /usr/src/app/settings.json ./settings.json
