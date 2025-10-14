@@ -14,11 +14,13 @@ export function validateEnv() {
   const result = envSchema.safeParse(process.env)
   if (!result.success) {
     const u = ck.underline
-    for (const error of result.error.errors) {
-      const { path, message } = error
+    for (const issue of result.error.issues) {
+      const { path, message } = issue
       logger.error(`ENV VAR: ${ck.bold(path)} ${message}`)
-      if (error.code == 'invalid_type')
-        logger.log(ck.dim(`└ "Expected: ${u(error.expected)} | Received: ${u(error.received)}`))
+      if (issue.code === 'invalid_type') {
+        const expected = issue.expected || 'unknown'
+        logger.log(ck.dim(`└ "Expected: ${u(expected)}`))
+      }
     }
     logger.log()
     logger.warn(
