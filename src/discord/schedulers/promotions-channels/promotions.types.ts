@@ -172,7 +172,17 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
     ],
     secondary: ['controle', 'joystick', 'setup'],
     contextRequired: ['jogo'], // 'jogo' só conta se tiver contexto gamer
-    exclusions: ['facas', 'panela', 'cozinha', 'utensílio', 'tramontina', 'inox'],
+    exclusions: [
+      'facas',
+      'panela',
+      'cozinha',
+      'utensílio',
+      'tramontina',
+      'inox',
+      'fire stick',
+      'memoria ram',
+      'fonte',
+    ],
     combinations: [
       ['jogo', 'ps'],
       ['jogo', 'xbox'],
@@ -250,7 +260,7 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'bijuteria',
     ],
     contextRequired: [],
-    exclusions: ['panela', 'cozinha', 'utensílio', 'eletrodoméstico'],
+    exclusions: ['panela', 'cozinha', 'utensílio', 'eletrodoméstico', 'sabonete', 'shampoo', 'sabao'],
     combinations: [],
   },
 
@@ -508,6 +518,9 @@ export const SMART_KEYWORDS: Record<PromotionCategory, SmartKeywordConfig> = {
       'capa',
       'película',
       'suporte',
+      'cadeira',
+      'iphone',
+      'cooktop',
     ],
     combinations: [
       ['placa', 'vídeo'],
